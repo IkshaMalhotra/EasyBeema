@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --primary-background: #019de3;
+    --primary-foreground: #ffffff;
+    --primary-light: #e7f7ff;
+    --primary-lighter: #f3fbff;
+
+    /* Secondary Colors */
+    --secondary-background: #ffffff;
+    --secondary-foreground: #000000;
+    --secondary-light: #fffdfd;
+
+    /* Text Colors */
+    --text-primary: #000000;
+    --text-secondary: #000000bf;
+    --text-tertiary: #000000cc;
+    --text-accent: #019de3;
+    --text-muted: #828282;
+    --text-dark: #040404;
+    --text-darker: #080808;
+    --text-darkest: #0e0e0e;
+    --text-gray: #444444;
+    --text-light: #181818;
+    --text-white: #ffffff;
+
+    /* Background Colors */
+    --bg-main: #ffffff;
+    --bg-accent: #019de3;
+    --bg-light: #e7f7ff;
+    --bg-lighter: #f3fbff;
+    --bg-card: #fffdfd;
+
+    /* Border Colors */
+    --border-primary: #dfdfdf;
+
+    /* Typography Variables */
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 22px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 32px;
+    --font-size-5xl: 40px;
+    --font-size-6xl: 48px;
+
+    /* Font Weight Variables */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+
+    /* Line Height Variables */
+    --line-height-tight: 17px;
+    --line-height-snug: 19px;
+    --line-height-normal: 20px;
+    --line-height-relaxed: 22px;
+    --line-height-loose: 25px;
+    --line-height-xl: 30px;
+    --line-height-2xl: 36px;
+    --line-height-3xl: 49px;
+    --line-height-4xl: 58px;
+
+    /* Spacing Variables */
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-5: 20px;
+    --spacing-6: 24px;
+    --spacing-7: 28px;
+    --spacing-8: 32px;
+    --spacing-10: 40px;
+    --spacing-12: 48px;
+    --spacing-14: 56px;
+    --spacing-16: 64px;
+    --spacing-20: 80px;
+
+    /* Border Radius Variables */
+    --radius-sm: 8px;
+    --radius-md: 20px;
+    --radius-lg: 32px;
+    --radius-xl: 34px;
+    --radius-2xl: 36px;
+
+    /* Component-specific Colors */
+    --header-background: var(--bg-main);
+    --button-primary-bg: var(--primary-background);
+    --button-primary-text: var(--text-white);
+    --button-secondary-bg: var(--bg-lighter);
+    --button-secondary-text: var(--text-primary);
+    --input-background: var(--bg-main);
+    --input-border: var(--border-primary);
+    --input-text: var(--text-muted);
+  }
+}
