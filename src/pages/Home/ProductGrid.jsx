@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '../../components/ui/Button';
 import Container from '../../components/common/Container';
+import { Link } from 'react-router-dom';
 
 const ProductGrid = () => {
   const products = [
@@ -63,7 +64,7 @@ const ProductGrid = () => {
   ];
 
   return (
-  <section className="w-full section-spacing">
+    <section className="w-full section-spacing">
       <Container className="px-4 sm:px-6 lg:px-[148px]">
         <div className="flex flex-col gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Section Header */}
@@ -85,7 +86,7 @@ const ProductGrid = () => {
               position="static"
               variant="primary"
               size="medium"
-              onClick={() => {}}
+              onClick={() => { }}
             />
           </div>
 
@@ -93,8 +94,11 @@ const ProductGrid = () => {
           <div className="w-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-16 auto-rows-fr">
               {products?.map((product) => (
-                <div key={product?.id} className="flex flex-col gap-4 sm:gap-5 lg:gap-6 items-start h-full">
-                  {/* Product Image Container */}
+                <Link
+                  to={`/policy/${product?.id}`}
+                  key={product?.id}
+                  className="flex flex-col gap-4 sm:gap-5 lg:gap-6 items-start h-full"
+                >                  {/* Product Image Container */}
                   <div className="w-full bg-primary-lighter rounded-sm flex items-center justify-center p-4 h-[166px] sm:h-[180px] lg:h-[166px]">
                     <img
                       src={product?.image}
@@ -112,7 +116,7 @@ const ProductGrid = () => {
                       {product?.title}
                     </h3>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
@@ -134,7 +138,7 @@ const ProductGrid = () => {
                 position="static"
                 variant="primary"
                 size="medium"
-                onClick={() => {}}
+                onClick={() => { }}
                 className=""
               />
             </div>

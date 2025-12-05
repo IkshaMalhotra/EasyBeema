@@ -1,14 +1,23 @@
-import Footer from './components/common/Footer.jsx';
-import Header from './components/common/Header.jsx';
-import Routes from './Routes';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/Home";
+import Login from "./pages/authentication/Login";
+import Signup from "./pages/authentication/Signup";
+import PolicyDetails from "./pages/Policy/PolicyDetails";
+import MainLayout from "./layouts/MainLayout";
 
-function App() {
+/* Why: App routes with layout */
+export default function App() {
   return (
-    <div>
-      <Header />
-      <Routes />
-    </div>
+    <Router>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/policy/:id" element={<PolicyDetails />} />
+        </Routes>
+      </MainLayout>
+    </Router>
   );
 }
-
-export default App;

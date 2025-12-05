@@ -1,21 +1,23 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/authentication/Login.jsx';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/Home"; // ensure this file exists in your project
+import Login from "./pages/authentication/Login";
+import Signup from "./pages/authentication/Signup";
+import PolicyDetails from "./pages/Policy/PolicyDetails";
+import MainLayout from "./layouts/MainLayout";
 
-// Import page components
-import HomePage from './pages/Home';
-import Signup from './pages/authentication/Signup.jsx';
-
-const AppRoutes = () => {
+/* Why: App routes with layout */
+export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-         <Route path="/login" element={<Login />} />
-         <Route path="/signup" element={<Signup />} />
-      </Routes>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/policy/:id" element={<PolicyDetails />} />
+        </Routes>
+      </MainLayout>
     </Router>
   );
-};
-
-export default AppRoutes;
+}

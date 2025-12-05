@@ -1,13 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import Header from '../../components/common/Header';
 import HeroSection from './HeroSection';
 import ProductGrid from './ProductGrid';
 import ProcessSection from './ProcessSection';
 import TestimonialSection from './TestimonialSection';
 import PartnersSection from './PartnersSection';
 import ContactForm from './ContactForm';
-import Footer from '../../components/common/Footer';
 
 const Home = () => {
   return (
@@ -29,7 +27,6 @@ const Home = () => {
         <TestimonialSection />
         <PartnersSection />
         <ContactForm />
-        <Footer />
       </main>
     </>
   );
