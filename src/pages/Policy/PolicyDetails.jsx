@@ -89,7 +89,7 @@ export default function PolicyDetails() {
                                             ? "bg-[#059be8] text-white shadow-lg"
                                             : "bg-[#09a6e7]/90 text-white/90"
                                             }`}
-                                        aria-pressed={gender === g}
+                                        aria-pressed={gender === g} required
                                     >
                                         {g}
                                     </button>
@@ -105,7 +105,7 @@ export default function PolicyDetails() {
                                             value={form.name}
                                             onChange={onChange}
                                             placeholder="Enter your name"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]"
+                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
                                         />
                                     </label>
 
@@ -116,7 +116,7 @@ export default function PolicyDetails() {
                                             value={form.dob}
                                             onChange={onChange}
                                             placeholder="DD/MM/YYYY"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]"
+                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
                                         />
                                     </label>
 
@@ -127,7 +127,7 @@ export default function PolicyDetails() {
                                             value={form.mobile}
                                             onChange={onChange}
                                             placeholder="Enter your mobile number"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]"
+                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
                                         />
                                     </label>
 
