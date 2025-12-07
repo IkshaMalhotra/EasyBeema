@@ -4,6 +4,7 @@ import HomePage from "./pages/Home"; // ensure this file exists in your project
 import Login from "./pages/authentication/Login";
 import Signup from "./pages/authentication/Signup";
 import PolicyDetails from "./pages/Policy/PolicyDetails";
+import Plans from "./pages/Policy/Plans";
 import MainLayout from "./layouts/MainLayout";
 
 /* Why: App routes with layout */
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/policy/:id" element={<PolicyDetails />} />
+          <Route path="/plans" element={<Plans />} />
         </Routes>
       </MainLayout>
     </Router>

@@ -5,6 +5,7 @@ import Login from "./pages/authentication/Login";
 import Signup from "./pages/authentication/Signup";
 import PolicyDetails from "./pages/Policy/PolicyDetails";
 import MainLayout from "./layouts/MainLayout";
+import Plans from "./pages/Policy/Plans";
 
 /* Why: App routes with layout */
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/policy/:id" element={<PolicyDetails />} />
+          <Route path="/plans" element={<Plans />} />
         </Routes>
       </MainLayout>
     </Router>

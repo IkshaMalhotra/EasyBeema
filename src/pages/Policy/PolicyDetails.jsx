@@ -1,6 +1,10 @@
+import { number } from "prop-types";
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function PolicyDetails() {
+    const navigate = useNavigate();
+    const { id } = useParams();
     const [gender, setGender] = useState("MALE");
     const [smoke, setSmoke] = useState(null);
     const [form, setForm] = useState({ name: "", dob: "", mobile: "" });
@@ -122,7 +126,7 @@ export default function PolicyDetails() {
 
                                     <label className="block">
                                         <div className="text-gray-500 text-sm mb-2">Mobile Number</div>
-                                        <input
+                                        <input type="tel"
                                             name="mobile"
                                             value={form.mobile}
                                             onChange={onChange}
@@ -174,15 +178,15 @@ export default function PolicyDetails() {
                         </div>
                     </div>
                 </main>
-                        </div>
+            </div>
 
-                        {/* SurveyPanel overlay */}
-                        <SurveyPanel open={showSurvey} onClose={() => setShowSurvey(false)} />
-                </div>
-        );
+            {/* SurveyPanel overlay */}
+            <SurveyPanel open={showSurvey} onClose={() => setShowSurvey(false)} navigate={navigate} formData={form} gender={gender} smoke={smoke} productId={id} />
+        </div>
+    );
 }
 
-function SurveyPanel({ open, onClose }) {
+function SurveyPanel({ open, onClose, navigate, formData, gender, smoke, productId }) {
     if (!open) return null;
     const [occupation, setOccupation] = useState(null);
     const [income, setIncome] = useState(null);
@@ -210,9 +214,17 @@ function SurveyPanel({ open, onClose }) {
     }, [open, onClose]);
 
     const handleContinue = () => {
-        // Replace with actual submit logic
-        console.log("Survey result:", { occupation, income, education });
-        onClose();
+        // Navigate to Plans page with form data and survey results
+        const surveyData = { occupation, income, education };
+        navigate("/plans", {
+            state: {
+                form: formData,
+                gender,
+                smoke,
+                survey: surveyData,
+                productId
+            }
+        });
     };
 
     // Keep DOM in place for smooth animation; use pointer-events to control interactability
