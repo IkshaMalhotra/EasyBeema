@@ -1,16 +1,16 @@
-import React from "react";
-import { useState } from "react";
+// File: src/pages/Policy/Plans.jsx
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
 const PRODUCT_TITLES = {
-    "1": "Term Life Insurance",
-    "2": "Health Insurance",
-    "3": "Car Insurance",
-    "4": "Family Insurance",
-    "5": "Investment Plans",
-    "6": "Travel Insurance",
-    "7": "Term Insurance (Women)",
-    "8": "2 Wheeler Insurance",
+  "1": "Term Life Insurance",
+  "2": "Health Insurance",
+  "3": "Car Insurance",
+  "4": "Family Insurance",
+  "5": "Investment Plans",
+  "6": "Travel Insurance",
+  "7": "Term Insurance (Women)",
+  "8": "2 Wheeler Insurance",
 };
 
 export const PLANS = [
@@ -45,7 +45,8 @@ export const PLANS = [
     ],
 
     priceMonthly: 1391,
-    priceYearly: 12685
+    priceYearly: 12685,
+    originalprice: 1594
   },
 
   {
@@ -77,8 +78,9 @@ export const PLANS = [
       "Pro-rata deductions after 30 days"
     ],
 
-    priceMonthly: 1391,
-    priceYearly: 12685
+    priceMonthly: 1580,
+    priceYearly: 12935,
+    originalprice: 1810
   },
 
   {
@@ -111,8 +113,9 @@ export const PLANS = [
       "Easy cancellation via mobile app"
     ],
 
-    priceMonthly: 1391,
-    priceYearly: 12685
+    priceMonthly: 1006,
+    priceYearly: 15001,
+    originalprice: 1200
   }
 ];
 
@@ -122,7 +125,7 @@ function Modal({ open, onClose, title, items }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl animate-fadeIn">
-        
+
         <h2 className="text-xl font-semibold mb-4 text-gray-700">{title}</h2>
 
         <ul className="space-y-3">
@@ -147,30 +150,149 @@ function Modal({ open, onClose, title, items }) {
   );
 }
 
+function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
+  const [cycle, setCycle] = useState(initialCycle);
+  const [years, setYears] = useState(33); // demo age selector
+  const ref = useRef(null);
+
+  // compute demo totals
+  const monthly = plan.priceMonthly;
+  const yearly = plan.priceYearly;
+  const totalPay = cycle === "monthly" ? (monthly * 12).toLocaleString() : yearly.toLocaleString();
+
+  useEffect(() => {
+    if (open) {
+      // focus popup
+      setTimeout(() => ref.current?.focus(), 50);
+      const onKey = (e) => { if (e.key === "Escape") onClose(); };
+      document.addEventListener("keydown", onKey);
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.removeEventListener("keydown", onKey);
+        document.body.style.overflow = "";
+      };
+    }
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        ref={ref}
+        tabIndex={-1}
+        className="relative z-50 w-[320px] bg-white rounded-2xl shadow-2xl border p-6 mx-4"
+        aria-label="Pay now"
+      >
+        <div className="flex items-start justify-between">
+          <h3 className="text-lg font-semibold">Pay Now!</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 ml-2 p-1 rounded"
+            aria-label="Close payment"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Price pill */}
+        <div className="mt-4 flex justify-center">
+          <div className="bg-[#f43f6b] text-white rounded-md px-4 py-2 text-lg font-semibold">
+            Rs. {cycle === "monthly" ? monthly : yearly} <span className="text-xs font-normal">{cycle === "monthly" ? "/month" : "/year"}</span>
+          </div>
+        </div>
+
+        {/* cycle toggle + months */}
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setCycle("monthly")}
+              className={`px-2 py-1 text-sm rounded-full ${cycle === "monthly" ? "bg-[#03a9f4] text-white" : "text-[#03a9f4]"}`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setCycle("yearly")}
+              className={`px-3 py-1 text-sm rounded-full ${cycle === "yearly" ? "bg-[#03a9f4] text-white" : "text-[#03a9f4]"}`}
+            >
+              Yearly
+            </button>
+          </div>
+
+          <select
+            value={years}
+            onChange={(e) => setYears(Number(e.target.value))}
+            className="border rounded px-3 py-1 text-sm"
+            aria-label="Years to cover till"
+          >
+            {[22, 25, 30, 33, 38, 45].map((a) => (
+              <option key={a} value={a}>{a} years</option>
+            ))}
+          </select>
+
+          {cycle === "monthly" && <div className="text-sm text-gray-600">x 12 Months</div>}
+        </div>
+
+        <hr className="my-4" />
+
+        {/* Total pay */}
+        <div className="text-center">
+          <div className="text-sm text-gray-600">Total Pay</div>
+          <div className="mt-3 bg-[#f43f6b] text-white rounded-md px-4 py-2 text-lg font-semibold inline-block">
+            Rs. {totalPay}
+          </div>
+        </div>
+
+        {/* footer actions */}
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="bg-[#03a9f4] text-white px-4 py-2 rounded-md">Rs. {cycle === "monthly" ? monthly : yearly}/{cycle === "monthly" ? "month" : "year"}</div>
+          <button
+            type="button"
+            onClick={() => { alert("Proceeding to payment (demo)"); onClose(); }}
+            className="px-4 py-2 rounded-md bg-white border"
+          >
+            Proceed
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* PlanCard component */
 function PlanCard({ plan, billingCycle }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
+  const [showPay, setShowPay] = useState(false); // FIXED: added missing showPay state
 
   const openSection = (label) => {
     if (label === "Plan Details") {
       setModalTitle("Plan Details");
       setModalItems(plan.planDetails);
-    }
-    if (label.includes("Free add-ons")) {
+    } else if (label.includes("Free add-ons")) {
       setModalTitle("Free Add-ons Included");
       setModalItems(plan.addons);
-    }
-    if (label === "Full Refund") {
+    } else if (label === "Full Refund") {
       setModalTitle("Refund Policy");
       setModalItems(plan.refundPolicy);
+    } else {
+      setModalTitle(label);
+      setModalItems([]);
     }
     setModalOpen(true);
   };
 
   const price =
     billingCycle === "monthly" ? plan.priceMonthly : plan.priceYearly;
+  const originalprice = plan.originalprice;
 
   const cycleLabel = billingCycle === "monthly" ? "/month" : "/year";
 
@@ -179,15 +301,18 @@ function PlanCard({ plan, billingCycle }) {
       {/* CARD UI */}
       <article className="relative bg-white rounded-2xl border border-[#11111120] p-6 mb-6 shadow-sm">
 
-        {/* Heart */}
+        {/* Arrow (opens payment popup) */}
         <button
           type="button"
-          aria-label="Favourite"
+          aria-label="Pay now"
+          onClick={() => setShowPay(true)}
           className="absolute right-4 top-4 w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-white/90"
         >
-          <svg className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none">
-            <path d="M12 21s-7-4.35-9-7.07C1.5 11.33 3 8 6 7c2.5-0.87 4.5 1 6 3 1.5-2 3.5-3.87 6-3 3 1 4.5 4.33 3 6.93C19 16.65 12 21 12 21z" stroke="currentColor" strokeWidth="1.2" />
-          </svg>
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+          </div>
         </button>
 
         <div className="flex items-center gap-6">
@@ -230,107 +355,113 @@ function PlanCard({ plan, billingCycle }) {
               <div className="w-24 h-[3px] bg-[#11182710] mt-2 rounded" />
             </div>
             <div className="text-xs text-gray-400 line-through">
-              Rs. 1594 incl. GST
+              Rs. {originalprice} incl. GST
             </div>
           </div>
         </div>
       </article>
 
       {/* MODAL */}
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={modalTitle}
-        items={modalItems}
-      />
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModalOpen(false)} />
+          <div className="relative z-50 w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
+            <div className="flex justify-between items-start">
+              <h3 className="text-lg font-semibold">{modalTitle}</h3>
+              <button onClick={() => setModalOpen(false)} className="text-gray-500">✕</button>
+            </div>
+            <ul className="mt-4 space-y-2 text-sm text-gray-700">
+              {modalItems.map((it, i) => <li key={i}>• {it}</li>)}
+            </ul>
+            <div className="mt-6">
+              <button onClick={() => setModalOpen(false)} className="w-full bg-[#03a9f4] text-white py-2 rounded-md">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* payment popup */}
+      <PaymentPopup open={showPay} onClose={() => setShowPay(false)} plan={plan} initialCycle={billingCycle} />
     </>
   );
 }
 
 /* Plans page */
 export default function Plans() {
-    const { id } = useParams();
-    const location = useLocation();
-    const state = location.state || {};
-    const visiblePlans = PLANS;
-    const [billingCycle, setBillingCycle] = useState("monthly");
-    const incomingProductId = state?.productId || id;
-    const productTitle = state?.productTitle || (incomingProductId ? PRODUCT_TITLES[incomingProductId] : null) || "Insurance Product";
+  const { id } = useParams();
+  const location = useLocation();
+  const state = location.state || {};
+  const visiblePlans = PLANS;
+  const [billingCycle, setBillingCycle] = useState("monthly");
+  const incomingProductId = state?.productId || id;
+  const productTitle = state?.productTitle || (incomingProductId ? PRODUCT_TITLES[incomingProductId] : null) || "Insurance Product";
 
-    return (
-        <div className="min-h-screen bg-gradient-to-b from-primary-light to-white py-12 px-6">
-            <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <header className="flex items-center justify-between mb-20">
-                    <div className="flex items-center gap-6">
-                        <img src="/images/EasyBeema.png" alt="Easy Beema" className="h-12" />
-                        <div>
-                            <h1 className="text-4xl font-extrabold tracking-tight">
-                                Best Plans <span className="text-[#03a9f4]">for you!</span>
-                            </h1>
-                            <p className="mt-1 text-sm text-gray-500">Recommended plans based on your selection</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white">
-                            <button type="button" className="px-4 py-2 text-sm text-gray-600">Life Cover ▾</button>
-                            <button type="button" className="px-4 py-2 text-sm text-gray-600">Age to cover till ▾</button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <div className="text-sm text-gray-500 mr-2 hidden md:block">
-                                {productTitle}
-                            </div>
-
-                            {/* Toggle Container */}
-                            <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
-
-                                {/* Monthly */}
-                                <button
-                                    type="button"
-                                    onClick={() => setBillingCycle("monthly")}
-                                    className={`px-4 py-2 text-sm rounded-full transition-all 
-        ${billingCycle === "monthly"
-                                            ? "bg-[#03a9f4] text-white shadow"
-                                            : "text-[#03a9f4]"
-                                        }`}
-                                >
-                                    Monthly
-                                </button>
-
-                                {/* Yearly */}
-                                <button
-                                    type="button"
-                                    onClick={() => setBillingCycle("yearly")}
-                                    className={`px-4 py-2 text-sm rounded-full transition-all 
-        ${billingCycle === "yearly"
-                                            ? "bg-[#03a9f4] text-white shadow"
-                                            : "text-[#03a9f4]"
-                                        }`}
-                                >
-                                    Yearly
-                                </button>
-
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Cards list */}
-                <section>
-                    {visiblePlans.map((plan) => (
-                        <PlanCard key={plan.id} plan={plan} billingCycle={billingCycle} />
-                    ))}
-                </section>
-
-
-                {/* Floating chat buttons */}
-                <div className="fixed right-6 bottom-24 flex flex-col gap-4">
-                    <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Chat with us now!</button>
-                    <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Schedule a call with us!</button>
-                </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-primary-light to-white py-12 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-20">
+          <div className="flex items-center gap-6">
+            <img src="/images/EasyBeema.png" alt="Easy Beema" className="h-12" />
+            <div>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                Best Plans <span className="text-[#03a9f4]">for you!</span>
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">Recommended plans based on your selection</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white">
+              <button type="button" className="px-4 py-2 text-sm text-gray-600">Life Cover ▾</button>
+              <button type="button" className="px-4 py-2 text-sm text-gray-600">Age to cover till ▾</button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-gray-500 mr-2 hidden md:block">
+                {productTitle}
+              </div>
+
+              {/* Toggle Container */}
+              <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
+
+                {/* Monthly */}
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle("monthly")}
+                  className={`px-4 py-2 text-sm rounded-full transition-all ${billingCycle === "monthly" ? "bg-[#03a9f4] text-white shadow" : "text-[#03a9f4]"}`}
+                >
+                  Monthly
+                </button>
+
+                {/* Yearly */}
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle("yearly")}
+                  className={`px-4 py-2 text-sm rounded-full transition-all ${billingCycle === "yearly" ? "bg-[#03a9f4] text-white shadow" : "text-[#03a9f4]"}`}
+                >
+                  Yearly
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Cards list */}
+        <section>
+          {visiblePlans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} billingCycle={billingCycle} />
+          ))}
+        </section>
+
+
+        {/* Floating chat buttons */}
+        <div className="fixed right-6 bottom-24 flex flex-col gap-4">
+          <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Chat with us now!</button>
+          <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Schedule a call with us!</button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
