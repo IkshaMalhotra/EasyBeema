@@ -1,7 +1,8 @@
+// File: src/pages/Policy/Payments.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// --- Demo data ---
+/* --- Demo constants --- */
 const PRODUCT_TITLES = {
   "1": "Term Life Insurance",
   "2": "Health Insurance",
@@ -38,28 +39,28 @@ const PLAN_FEATURES = [
   "Death benefit - sum assured to nominees",
   "Terminal illness benefit",
   "Optional riders available",
-  "Simple digital onboarding"
+  "Simple digital onboarding",
 ];
 
 const FREE_BENEFITS = [
   "Free-look 30 days",
   "Instant claim support (24x7)",
   "E-policy delivery",
-  "Priority customer support"
+  "Priority customer support",
 ];
 
 const LIFE_STAGE_BENEFITS = [
   "Maternity care add-on (women)",
   "Child education benefit",
   "Senior-care wellness program",
-  "Health check vouchers at milestones"
+  "Health check vouchers at milestones",
 ];
 
 const PAID_BENEFITS = [
   "Critical illness rider",
   "Accidental death benefit",
   "Hospital cash rider (paid)",
-  "Premium waiver on disability"
+  "Premium waiver on disability",
 ];
 
 const UPGRADE_PLANS = [
@@ -73,28 +74,33 @@ const ADD_ON_RIDERS = [
   { id: "r3", label: "Hospital Cash Rider", costMonthly: 60 },
 ];
 
-// --- Helper formatting ---
-const fmt = (n) => {
-  if (typeof n !== "number") return n;
-  return n.toLocaleString("en-IN");
-};
+/* helper */
+const fmt = (n) => (typeof n === "number" ? n.toLocaleString("en-IN") : n);
 
-// --- Component ---
+/* --- Payments component (full) --- */
 export default function Payments() {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state || {};
 
-  // Profile & navigation state (from PolicyDetails -> Plans etc)
+  // Profile & navigation state
   const profile = state.form || { name: "", dob: "", mobile: "" };
   const gender = state.gender || profile.gender || "";
   const smoke = state.smoke !== undefined ? state.smoke : null;
   const survey = state.survey || {};
-  const incomingProductId = state?.productId || state?.planId || null;
-  const productTitle = state?.productTitle || (incomingProductId ? PLANS_DEMO.find(p => p.id === incomingProductId)?.title : null) || "Term Life Insurance";
 
-  // active plan (if passed, else fallback)
-  const activePlan = state.plan || (incomingProductId ? PLANS_DEMO.find(p => p.id === incomingProductId) : PLANS_DEMO[0]);
+  // Accept product id from multiple possible places
+  const incomingProductId = state?.productId ?? state?.planId ?? state?.plan?.id ?? null;
+
+  // activePlan: prefer full plan object in state; else find by id; else fallback to first demo
+  const activePlan =
+    state?.plan ??
+    (incomingProductId ? PLANS_DEMO.find((p) => String(p.id) === String(incomingProductId)) : null) ??
+    PLANS_DEMO[0];
+
+  // productTitle: compute early so handlers can use it safely
+  const productTitle =
+    state?.productTitle ?? activePlan?.title ?? (incomingProductId ? PRODUCT_TITLES[String(incomingProductId)] : null) ?? "Insurance Product";
 
   // UI state
   const [lifeCover, setLifeCover] = useState("₹1 Crore");
@@ -115,30 +121,26 @@ export default function Payments() {
     mobile: profile.mobile || "",
   });
 
-  // Payment flow
+  // Payment flow state
   const [isPaying, setIsPaying] = useState(false);
-  const [receipt, setReceipt] = useState(null);
   const mainRef = useRef(null);
 
-  // compute price
+  // price computation
   const baseMonthly = activePlan?.priceMonthly || 0;
-  const baseYearly = activePlan?.priceYearly || (baseMonthly * 12);
+  const baseYearly = activePlan?.priceYearly || baseMonthly * 12;
   const upgradesMonthly = Object.keys(selectedUpgrades).reduce((sum, k) => sum + (selectedUpgrades[k] ? UPGRADE_PLANS.find(u => u.id === k)?.costMonthly || 0 : 0), 0);
   const ridersMonthly = Object.keys(selectedRiders).reduce((sum, k) => sum + (selectedRiders[k] ? ADD_ON_RIDERS.find(r => r.id === k)?.costMonthly || 0 : 0), 0);
 
   const effectiveMonthly = baseMonthly + upgradesMonthly + ridersMonthly;
   const effectiveYearly = baseYearly + (upgradesMonthly + ridersMonthly) * 12;
 
-  // footer totals depend on mode
   const displayedPrice = mode === "Monthly" ? effectiveMonthly : effectiveYearly;
   const displayedCycleLabel = mode === "Monthly" ? "/month" : "/year";
 
   useEffect(() => {
-    // focus main for keyboard users
     mainRef.current?.focus();
   }, []);
 
-  // toggles
   function toggleUpgrade(id) {
     setSelectedUpgrades(prev => ({ ...prev, [id]: !prev[id] }));
   }
@@ -146,17 +148,13 @@ export default function Payments() {
     setSelectedRiders(prev => ({ ...prev, [id]: !prev[id] }));
   }
 
-  // ---------------------------
-  // UPDATED: Proceed handler now navigates to ConfirmationPanel
-  // ---------------------------
+  // Proceed: validate & navigate to confirmation page
   function handleProceed() {
-    // basic validation
     if (!userForm.fullName || !userForm.mobile) {
       alert("Please fill your name and mobile before proceeding.");
       return;
     }
 
-    // Build payload to pass to confirmation page
     const payload = {
       form: {
         name: userForm.fullName,
@@ -177,23 +175,24 @@ export default function Payments() {
       price: displayedPrice,
       selectedUpgrades,
       selectedRiders,
-      // you can add more flags if needed
     };
 
-    // Navigate to confirmation panel route
+    // navigate to confirmation UI (create a /confirm route to receive this)
     navigate("/confirm", { state: payload });
   }
 
   return (
     <div className="min-h-screen bg-[#f8fbff] px-6 py-8">
       <div className="max-w-[1200px] mx-auto" ref={mainRef} tabIndex={-1}>
-        {/* Top profile / header */}
+        {/* Header */}
         <header className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <img src="/images/EasyBeema.png" alt="logo" className="h-12" />
             <div className="text-sm text-gray-600">
               <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zM2 22a10 10 0 0120 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 12a5 5 0 100-10 5 5 0 000 10zM2 22a10 10 0 0120 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 <span className="font-medium">{gender === "FEMALE" ? "Female" : gender === "MALE" ? "Male" : "Other"}</span>
                 <span className="text-gray-400">|</span>
                 <span className="text-sm">DOB: {userForm.dob || "—"}</span>
@@ -206,17 +205,16 @@ export default function Payments() {
             </div>
           </div>
 
-          <div>
-            <div className="text-sm text-gray-500 mr-2 hidden md:block">
-              {productTitle}
-            </div>
+          <div className="text-right">
+            {/* product title shown on all sizes for easier debug/visibility */}
+            <div className="text-sm text-gray-500 mr-2">{productTitle}</div>
             <button className="mt-2 bg-[#03a9f4] text-white px-4 py-2 rounded-md shadow" onClick={() => alert("Talk to expert (demo)")}>Talk to Expert</button>
           </div>
         </header>
 
-        {/* Main grid */}
+        {/* Grid */}
         <div className="grid grid-cols-12 gap-6">
-          {/* Left summary card */}
+          {/* Left summary */}
           <aside className="col-span-4">
             <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px]">
               <div className="flex items-start gap-3 mb-4">
@@ -226,7 +224,6 @@ export default function Payments() {
                 </div>
               </div>
 
-              {/* selectors */}
               <div className="space-y-3 mb-5">
                 <SelectRow label="Life Cover" value={lifeCover} onChangeValue={setLifeCover} options={["₹5 Lakh", "₹10 Lakh", "₹25 Lakh", "₹50 Lakh", "₹1 Crore", "₹2 Crore"]} />
                 <SelectRow label="Cover till Age" value={coverTill} onChangeValue={setCoverTill} options={["60 Years", "65 Years", "70 Years", "75 Years"]} />
@@ -234,7 +231,6 @@ export default function Payments() {
                 <SelectRow label="Mode of Premium Payment" value={mode} onChangeValue={setMode} options={["Monthly", "Yearly"]} />
               </div>
 
-              {/* small badges */}
               <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                 <div className="p-3 border rounded text-xs">
                   <div className="text-lg font-semibold text-gray-800">99.3%</div>
@@ -255,7 +251,6 @@ export default function Payments() {
           {/* Center tabs */}
           <section className="col-span-4">
             <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px] flex flex-col">
-              {/* tabs */}
               <nav className="flex items-center gap-6 border-b pb-3 mb-3 text-sm text-gray-600">
                 <Tab label="Plan Features" active={tab === "features"} onClick={() => setTab("features")} />
                 <Tab label="Free Benefits" active={tab === "free"} onClick={() => setTab("free")} />
@@ -264,18 +259,10 @@ export default function Payments() {
               </nav>
 
               <div className="flex-1 overflow-auto">
-                {tab === "features" && (
-                  <ListSection title="Plan Features" items={PLAN_FEATURES} />
-                )}
-                {tab === "free" && (
-                  <ListSection title="Free Benefits" items={FREE_BENEFITS} />
-                )}
-                {tab === "life" && (
-                  <ListSection title="Life Stage Benefits" items={LIFE_STAGE_BENEFITS} />
-                )}
-                {tab === "paid" && (
-                  <ListSection title="Paid Benefits" items={PAID_BENEFITS} />
-                )}
+                {tab === "features" && <ListSection title="Plan Features" items={PLAN_FEATURES} />}
+                {tab === "free" && <ListSection title="Free Benefits" items={FREE_BENEFITS} />}
+                {tab === "life" && <ListSection title="Life Stage Benefits" items={LIFE_STAGE_BENEFITS} />}
+                {tab === "paid" && <ListSection title="Paid Benefits" items={PAID_BENEFITS} />}
               </div>
 
               <div className="mt-4 text-right">
@@ -284,29 +271,29 @@ export default function Payments() {
             </div>
           </section>
 
-          {/* Right form / upgrade / add-ons */}
-          <aside className=" col-span-4 mb-20">
+          {/* Right form / upgrades */}
+          <aside className="col-span-4 mb-20">
             <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px] flex flex-col gap-3">
               <h4 className="text-lg font-medium">Your Details</h4>
 
               <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Full Name as Per ID Proof" value={userForm.fullName} onChange={(e) => setUserForm({...userForm, fullName: e.target.value})} />
+                <input className="w-full border rounded px-3 py-2" placeholder="Full Name as Per ID Proof" value={userForm.fullName} onChange={(e) => setUserForm({ ...userForm, fullName: e.target.value })} />
               </label>
 
               <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="E-mail Address" value={userForm.email} onChange={(e) => setUserForm({...userForm, email: e.target.value})} />
+                <input className="w-full border rounded px-3 py-2" placeholder="E-mail Address" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} />
               </label>
 
               <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Occupation" value={userForm.occupation} onChange={(e) => setUserForm({...userForm, occupation: e.target.value})} />
+                <input className="w-full border rounded px-3 py-2" placeholder="Occupation" value={userForm.occupation} onChange={(e) => setUserForm({ ...userForm, occupation: e.target.value })} />
               </label>
 
               <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Annual Income" value={userForm.annualIncome} onChange={(e) => setUserForm({...userForm, annualIncome: e.target.value})} />
+                <input className="w-full border rounded px-3 py-2" placeholder="Annual Income" value={userForm.annualIncome} onChange={(e) => setUserForm({ ...userForm, annualIncome: e.target.value })} />
               </label>
 
               <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Education" value={userForm.education} onChange={(e) => setUserForm({...userForm, education: e.target.value})} />
+                <input className="w-full border rounded px-3 py-2" placeholder="Education" value={userForm.education} onChange={(e) => setUserForm({ ...userForm, education: e.target.value })} />
               </label>
 
               <hr className="my-2" />
@@ -333,7 +320,6 @@ export default function Payments() {
                   </label>
                 ))}
               </div>
-
             </div>
           </aside>
         </div>

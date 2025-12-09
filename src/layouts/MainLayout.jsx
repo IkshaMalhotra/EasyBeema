@@ -8,8 +8,8 @@ export default function MainLayout({ children }) {
     const location = useLocation();
 
     // Pages where header should NOT show
-    const hideHeaderRoutes = ["/policy", "/plans", "/payments", "/confirm", "/payment-portal"];
-    const hideFooterRoutes = ["/payments", "/confirm", "/payment-portal"];
+    const hideHeaderRoutes = ["/policy", "/plans", "/payments", "/confirm", "/payment-portal", "/payment-completed"];
+    const hideFooterRoutes = ["/payments", "/confirm", "/payment-portal", "/payment-completed"];
 
     const hideHeader = hideHeaderRoutes.some((r) =>
         location.pathname.startsWith(r)

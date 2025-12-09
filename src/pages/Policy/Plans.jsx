@@ -431,7 +431,7 @@ export default function Plans() {
   const visiblePlans = PLANS;
   const [billingCycle, setBillingCycle] = useState("monthly");
   const incomingProductId = state?.productId || id;
-  const productTitle = state?.productTitle || (incomingProductId ? PRODUCT_TITLES[incomingProductId] : null) || "Insurance Product";
+  const productTitle = state?.productTitle || state?.plan?.title || (incomingProductId ? PRODUCT_TITLES[incomingProductId] : null) || "Insurance Product";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-light to-white py-12 px-6">

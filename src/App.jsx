@@ -9,6 +9,7 @@ import Plans from "./pages/Policy/Plans";
 import Payments from "./pages/Policy/Payments";
 import ConfirmationPanel from "./pages/Policy/Confirmationpanel";
 import PaymentPortal from "./pages/Policy/PaymentPortal";
+import PaymentCompleted from "./pages/Policy/Paymentcompleted";
 
 /* Why: App routes with layout */
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/confirm" element={<ConfirmationPanel />} />
           <Route path="/payment-portal" element={<PaymentPortal />} />
+          <Route path="/payment-completed" element={<PaymentCompleted />} />
         </Routes>
       </MainLayout>
     </Router>

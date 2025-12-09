@@ -21,6 +21,15 @@ export default function ConfirmationPanel() {
     const billingCycle = state.billingCycle || "Monthly";
     const price = state.price ?? (billingCycle === "Monthly" ? incomingPlan.priceMonthly : incomingPlan.priceYearly);
 
+    const incomingProductId = state?.productId ?? state?.planId ?? state?.plan?.id ?? null;
+
+    // activePlan: prefer full plan object in state; else use incomingPlan (already derived from state)
+    const activePlan = state?.plan ?? incomingPlan;
+
+    // productTitle: compute early so handlers can use it safely
+    const productTitle =
+        state?.productTitle ?? activePlan?.title ?? (incomingProductId ? PRODUCT_TITLES[String(incomingProductId)] : null) ?? "Insurance Product";
+
     const [form, setForm] = useState({
         name: incomingForm.name || "",
         dob: incomingForm.dob || "",
@@ -50,8 +59,6 @@ export default function ConfirmationPanel() {
     }, [incomingForm]);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-    const productTitle = state?.productTitle || (state?.productId ? PRODUCT_TITLES[state.productId] : null) || "Insurance Product";
 
     const handlePayNow = () => {
         if (!agreed) {

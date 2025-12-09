@@ -1,17 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const PRODUCT_TITLES = {
-    "1": "Term Life Insurance",
-    "2": "Health Insurance",
-    "3": "Car Insurance",
-    "4": "Family Insurance",
-    "5": "Investment Plans",
-    "6": "Travel Insurance",
-    "7": "Term Insurance (Women)",
-    "8": "2 Wheeler Insurance",
-};
-
 export default function PaymentPortal() {
     const navigate = useNavigate();
     const { state = {} } = useLocation();
@@ -24,6 +13,17 @@ export default function PaymentPortal() {
     const [selectedBank, setSelectedBank] = useState(null);
     const [selectOther, setSelectOther] = useState("");
     const [processing, setProcessing] = useState(false);
+
+    const PRODUCT_TITLES = {
+        "1": "Term Life Insurance",
+        "2": "Health Insurance",
+        "3": "Car Insurance",
+        "4": "Family Insurance",
+        "5": "Investment Plans",
+        "6": "Travel Insurance",
+        "7": "Term Insurance (Women)",
+        "8": "2 Wheeler Insurance",
+    };
 
     const bankTiles = [
         { id: "hdfc", label: "HDFC" },
@@ -55,7 +55,18 @@ export default function PaymentPortal() {
         }, 1200);
     };
 
-    const productTitle = state?.productTitle || (state?.productId ? PRODUCT_TITLES[state.productId] : null) || "Insurance Product";
+    const productTitle = state?.productTitle || state?.plan?.title || (state?.productId ? PRODUCT_TITLES[state.productId] : null) || "TERM Life Product";
+
+    const handleproceed = () => {
+        navigate("/payment-completed", {
+            state: {
+                orderId: "PB146577838",
+                premium: 988,
+                name: form.name
+            }
+        });
+
+    }
 
     return (
         <div className="min-h-screen bg-[#f4f8ff] px-6 py-8">
@@ -159,7 +170,7 @@ export default function PaymentPortal() {
                                     )}
 
                                     <div className="mt-6">
-                                        <button disabled={processing} onClick={startPayment} className="w-full bg-[#03a9f4] text-white py-3 rounded-md text-lg">
+                                        <button disabled={processing} onClick={handleproceed} className="w-full bg-[#03a9f4] text-white py-3 rounded-md text-lg">
                                             {processing ? "Processing..." : "Pay Now"}
                                         </button>
                                     </div>
