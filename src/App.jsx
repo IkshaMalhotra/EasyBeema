@@ -6,6 +6,7 @@ import Signup from "./pages/authentication/Signup";
 import PolicyDetails from "./pages/Policy/PolicyDetails";
 import MainLayout from "./layouts/MainLayout";
 import Plans from "./pages/Policy/Plans";
+import Payments from "./pages/Policy/Payments";
 
 /* Why: App routes with layout */
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/policy/:id" element={<PolicyDetails />} />
           <Route path="/plans" element={<Plans />} />
+          <Route path="/payments" element={<Payments />} />
         </Routes>
       </MainLayout>
     </Router>

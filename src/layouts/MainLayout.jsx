@@ -8,9 +8,14 @@ export default function MainLayout({ children }) {
     const location = useLocation();
 
     // Pages where header should NOT show
-    const hideHeaderRoutes = ["/policy", "/plans"];
+    const hideHeaderRoutes = ["/policy", "/plans", "/payments"];
+    const hideFooterRoutes = ["/payments"];
 
     const hideHeader = hideHeaderRoutes.some((r) =>
+        location.pathname.startsWith(r)
+    );
+
+    const hideFooter = hideFooterRoutes.some((r) =>
         location.pathname.startsWith(r)
     );
 
@@ -18,7 +23,7 @@ export default function MainLayout({ children }) {
         <>
             {!hideHeader && <Header />}
             <main>{children}</main>
-            <Footer />
+            {!hideFooter && <Footer />}
         </>
     );
 }

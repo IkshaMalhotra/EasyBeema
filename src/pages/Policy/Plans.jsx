@@ -1,6 +1,7 @@
 // File: src/pages/Policy/Plans.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const PRODUCT_TITLES = {
   "1": "Term Life Insurance",
@@ -150,19 +151,34 @@ function Modal({ open, onClose, title, items }) {
   );
 }
 
+// Replace your existing PaymentPopup with this exact function
 function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
+  // Hooks must be at top level of component
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Local UI state
   const [cycle, setCycle] = useState(initialCycle);
-  const [years, setYears] = useState(33); // demo age selector
+  const [years, setYears] = useState(33); // demo selector
   const ref = useRef(null);
 
+  // Read any state passed via navigate(...) from previous pages
+  // (PolicyDetails / Plans) — fallback to empty objects
+  const incomingState = location.state || {};
+  const formData = incomingState.form || {};
+  const gender = incomingState.gender ?? incomingState?.form?.gender ?? null;
+  const smoke = incomingState.smoke ?? incomingState?.form?.smoke ?? null;
+  const surveyData = incomingState.survey || {};
+  const productId = incomingState.productId || incomingState.planId || plan?.id;
+
   // compute demo totals
-  const monthly = plan.priceMonthly;
-  const yearly = plan.priceYearly;
+  const monthly = plan?.priceMonthly ?? 0;
+  const yearly = plan?.priceYearly ?? monthly * 12;
   const totalPay = cycle === "monthly" ? (monthly * 12).toLocaleString() : yearly.toLocaleString();
 
+  // focus, escape handling, body scroll lock
   useEffect(() => {
     if (open) {
-      // focus popup
       setTimeout(() => ref.current?.focus(), 50);
       const onKey = (e) => { if (e.key === "Escape") onClose(); };
       document.addEventListener("keydown", onKey);
@@ -175,6 +191,26 @@ function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
   }, [open, onClose]);
 
   if (!open) return null;
+
+  // Handler now uses navigate (hook at top-level) and variables available in scope
+  const handleContinue = () => {
+    const payload = {
+      form: formData,
+      gender,
+      smoke,
+      survey: surveyData,
+      productId,
+      planId: plan?.id,
+      plan,               // pass plan object (title, prices, addons, etc.)
+      billingCycle: cycle,
+      yearsToCover: years,
+    };
+
+    // navigate to payments and pass payload
+    navigate("/payments", { state: payload });
+    // optionally close popup (navigate will change page anyway)
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
@@ -203,11 +239,12 @@ function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
         {/* Price pill */}
         <div className="mt-4 flex justify-center">
           <div className="bg-[#f43f6b] text-white rounded-md px-4 py-2 text-lg font-semibold">
-            Rs. {cycle === "monthly" ? monthly : yearly} <span className="text-xs font-normal">{cycle === "monthly" ? "/month" : "/year"}</span>
+            Rs. {cycle === "monthly" ? monthly : yearly}{" "}
+            <span className="text-xs font-normal">{cycle === "monthly" ? "/month" : "/year"}</span>
           </div>
         </div>
 
-        {/* cycle toggle + months */}
+        {/* cycle toggle + years */}
         <div className="mt-4 flex items-center justify-center gap-3">
           <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
             <button
@@ -255,7 +292,7 @@ function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
           <div className="bg-[#03a9f4] text-white px-4 py-2 rounded-md">Rs. {cycle === "monthly" ? monthly : yearly}/{cycle === "monthly" ? "month" : "year"}</div>
           <button
             type="button"
-            onClick={() => { alert("Proceeding to payment (demo)"); onClose(); }}
+            onClick={handleContinue}
             className="px-4 py-2 rounded-md bg-white border"
           >
             Proceed
