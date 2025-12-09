@@ -20,7 +20,7 @@ const PLANS_DEMO = [
     vendorLogo: "/images/HDFCinsurance.png",
     title: "C2P Supreme - WOMEN SECURE SOLUTION",
     priceMonthly: 988,
-    priceYearly: 988 * 12 - 500, 
+    priceYearly: 988 * 12 - 500,
     originalMonthly: 1129,
   },
   {
@@ -100,11 +100,11 @@ export default function Payments() {
   const [lifeCover, setLifeCover] = useState("₹1 Crore");
   const [coverTill, setCoverTill] = useState("60 Years");
   const [payFor, setPayFor] = useState("33 Years");
-  const [mode, setMode] = useState("Monthly"); // Monthly / Yearly
+  const [mode, setMode] = useState(state?.billingCycle || "Monthly"); // Monthly / Yearly
 
   const [tab, setTab] = useState("features"); // features | free | life-stage | paid
-  const [selectedUpgrades, setSelectedUpgrades] = useState({});
-  const [selectedRiders, setSelectedRiders] = useState({});
+  const [selectedUpgrades, setSelectedUpgrades] = useState(state?.selectedUpgrades || {});
+  const [selectedRiders, setSelectedRiders] = useState(state?.selectedRiders || {});
   const [userForm, setUserForm] = useState({
     fullName: profile.name || "",
     email: profile.email || "",
@@ -133,31 +133,6 @@ export default function Payments() {
   const displayedPrice = mode === "Monthly" ? effectiveMonthly : effectiveYearly;
   const displayedCycleLabel = mode === "Monthly" ? "/month" : "/year";
 
-  // Payment simulation
-  function handleProceed() {
-    // basic validation
-    if (!userForm.fullName || !userForm.mobile) {
-      alert("Please fill your name and mobile before proceeding.");
-      return;
-    }
-
-    setIsPaying(true);
-    setReceipt(null);
-
-    // mock payment delay
-    setTimeout(() => {
-      const txnId = `TXN-${Date.now().toString().slice(-6)}`;
-      setReceipt({
-        txnId,
-        amount: displayedPrice,
-        mode,
-        date: new Date().toLocaleString(),
-        planTitle: activePlan?.title,
-      });
-      setIsPaying(false);
-    }, 1600);
-  }
-
   useEffect(() => {
     // focus main for keyboard users
     mainRef.current?.focus();
@@ -169,6 +144,44 @@ export default function Payments() {
   }
   function toggleRider(id) {
     setSelectedRiders(prev => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  // ---------------------------
+  // UPDATED: Proceed handler now navigates to ConfirmationPanel
+  // ---------------------------
+  function handleProceed() {
+    // basic validation
+    if (!userForm.fullName || !userForm.mobile) {
+      alert("Please fill your name and mobile before proceeding.");
+      return;
+    }
+
+    // Build payload to pass to confirmation page
+    const payload = {
+      form: {
+        name: userForm.fullName,
+        email: userForm.email,
+        mobile: userForm.mobile,
+        dob: userForm.dob,
+        occupation: userForm.occupation,
+        annualIncome: userForm.annualIncome,
+        education: userForm.education,
+      },
+      gender,
+      smoke,
+      survey,
+      productId: incomingProductId,
+      productTitle,
+      plan: activePlan,
+      billingCycle: mode,
+      price: displayedPrice,
+      selectedUpgrades,
+      selectedRiders,
+      // you can add more flags if needed
+    };
+
+    // Navigate to confirmation panel route
+    navigate("/confirm", { state: payload });
   }
 
   return (
@@ -195,8 +208,8 @@ export default function Payments() {
 
           <div>
             <div className="text-sm text-gray-500 mr-2 hidden md:block">
-                {productTitle}
-              </div>
+              {productTitle}
+            </div>
             <button className="mt-2 bg-[#03a9f4] text-white px-4 py-2 rounded-md shadow" onClick={() => alert("Talk to expert (demo)")}>Talk to Expert</button>
           </div>
         </header>
@@ -345,30 +358,6 @@ export default function Payments() {
             </div>
           </div>
         </div>
-
-        {/* Receipt modal / success area
-        {receipt && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setReceipt(null)} />
-            <div className="bg-white rounded-2xl p-6 z-50 w-full max-w-md">
-              <h3 className="text-xl font-semibold mb-2">Payment Successful</h3>
-              <p className="text-sm text-gray-600 mb-4">Transaction ID: <span className="font-medium">{receipt.txnId}</span></p>
-              <div className="mb-3">
-                <div className="text-sm text-gray-500">Plan</div>
-                <div className="font-medium">{receipt.planTitle}</div>
-              </div>
-              <div className="mb-3">
-                <div className="text-sm text-gray-500">Amount</div>
-                <div className="font-medium">Rs. {fmt(receipt.amount)} ({receipt.mode})</div>
-              </div>
-              <div className="mb-4 text-sm text-gray-500">Date: {receipt.date}</div>
-              <div className="flex gap-2">
-                <button onClick={() => { setReceipt(null); navigate("/"); }} className="flex-1 bg-[#03a9f4] text-white py-2 rounded-md">Done</button>
-                <button onClick={() => { alert("Download receipt (demo)"); }} className="flex-1 border py-2 rounded-md">Download</button>
-              </div>
-            </div>
-          </div>
-        )} */}
 
       </div>
     </div>
