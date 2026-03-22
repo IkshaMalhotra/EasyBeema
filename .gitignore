@@ -1,6 +1,8 @@
 # Node modules
 node_modules/
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Production build
 build/
@@ -16,6 +18,8 @@ Thumbs.db
 
 # Optional: if using TypeScript
 *.tsbuildinfo
+.tscache/
+.env
 
 # Optional: if using testing tools
 coverage/
@@ -24,3 +28,4 @@ jest-test-results.json
 # Optional: if using IDEs
 .vscode/
 .idea/
+.eslintcache
