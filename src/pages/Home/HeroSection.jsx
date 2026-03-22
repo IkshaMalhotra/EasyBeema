@@ -49,10 +49,10 @@ const HeroSection = () => {
 
             <div className="flex gap-4 flex-wrap mt-2">
               <Button
-                text="Explore Plans"
+                text="Explore Insurances"
                 variant="primary"
                 size="medium"
-                onClick={() => navigate("/policy/1")}
+                onClick={() => navigate("/#products")}
               />
               <Button
                 text="Talk to Expert"
