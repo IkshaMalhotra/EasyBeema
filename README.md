@@ -1,16 +1,16 @@
-# EasyBeema — Digital Insurance Marketplace
+# EasyBeema - Digital Insurance Marketplace
 
-EasyBeema is a frontend web application built with React.js. It is a trusted digital insurance marketplace that makes it simple for users to compare, choose, and buy the right insurance coverage — anytime, anywhere.
+EasyBeema is a frontend web application built with React.js. It is a trusted digital insurance marketplace that makes it simple for users to compare, choose, and buy the right insurance coverage anytime, anywhere.
 
 ---
 
 ## Tech Stack
 
-- **React.js** — UI framework
-- **React Router DOM** — client-side routing
-- **Tailwind CSS** — utility-first styling
-- **class-variance-authority** + **tailwind-merge** — component variant management
-- **react-icons** — icon library
+- **React.js** - UI framework
+- **React Router DOM** - client-side routing
+- **Tailwind CSS** - utility-first styling
+- **class-variance-authority** + **tailwind-merge** - component variant management
+- **react-icons** - icon library
 
 ---
 
@@ -82,10 +82,10 @@ npm run build
 
 ## Key Design Decisions
 
-- **Shared constants** — `src/constants/insurance.js` holds product titles, nav links, and footer links in one place to avoid duplication across files.
-- **MainLayout pattern** — Header and Footer are conditionally hidden on the policy purchase flow pages (which have their own internal headers), keeping those pages focused.
-- **State passed via React Router** — user data (name, DOB, gender, selected plan, billing cycle) is passed between pages using `navigate(route, { state: {...} })` — no external state management library needed for this scale.
-- **Component variants** — `Button.jsx` uses `class-variance-authority` to handle `primary`, `secondary`, and `ghost` variants cleanly without inline styles.
+- **Shared constants** - `src/constants/insurance.js` holds product titles, nav links, and footer links in one place to avoid duplication across files.
+- **MainLayout pattern** - Header and Footer are conditionally hidden on the policy purchase flow pages (which have their own internal headers), keeping those pages focused.
+- **State passed via React Router** - user data (name, DOB, gender, selected plan, billing cycle) is passed between pages using `navigate(route, { state: {...} })` - no external state management library needed for this scale.
+- **Component variants** - `Button.jsx` uses `class-variance-authority` to handle `primary`, `secondary`, and `ghost` variants cleanly without inline styles.
 
 ---
 
