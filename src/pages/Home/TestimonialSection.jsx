@@ -1,91 +1,80 @@
 import React from 'react';
 import Container from '../../components/common/Container';
 
+const TESTIMONIALS = [
+  {
+    id: 1,
+    text: "EasyBeema made buying health insurance so simple. I compared 5 plans in minutes and got covered the same day. Highly recommend!",
+    name: "Priya Sharma",
+    role: "Software Engineer",
+    avatar: "/images/img_user_thumb.png",
+  },
+  {
+    id: 2,
+    text: "I was confused about term insurance for years. EasyBeema's advisor walked me through everything clearly and helped me choose the best plan for my family.",
+    name: "Rahul Mehta",
+    role: "Business Owner",
+    avatar: "/images/img_user_thumb_64x64.png",
+  },
+  {
+    id: 3,
+    text: "The claim settlement was incredibly fast. EasyBeema's support team was with me at every step. I feel truly secure now.",
+    name: "Anjali Verma",
+    role: "Teacher",
+    avatar: "/images/img_user_thumb_1.png",
+  },
+];
+
+/**
+ * Star rating component — purely decorative, shows 5 stars.
+ */
+const StarRating = () => (
+  <div className="flex gap-1">
+    {[...Array(5)].map((_, i) => (
+      <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    ))}
+  </div>
+);
+
 const TestimonialSection = () => {
-  const testimonials = [
-    {
-      id: 1,
-      text: "Non risus viverra enim, quis. Eget vitae arcu vivamus sit tellus, viverra turpis lorem. Varius a turpis urna id porttitor.",
-      name: "Hellen Jummy",
-      role: "Team Lead",
-      avatar: "/images/img_user_thumb.png",
-      bgColor: "linear-gradient(180deg,#ffc727 0%,#ffc727 50%, #ff8127 100%)",
-      cardBg: "#f3fbff"
-    },
-    {
-      id: 2,
-      text: "Aliquet ridiculus mi porta habitant vulputate rhoncus, mattis amet enim. Sit purus venenatis velit semper lectus sed ornare quam nulla. Lacus, ut congue sagittis vel nisi integer imperdiet a vitae.",
-      name: "David Oshodi",
-      role: "Manager",
-      avatar: "/images/img_user_thumb_64x64.png",
-      bgColor: "#f3fbff",
-      cardBg: "#f3fbff"
-    },
-    {
-      id: 3,
-      text: "A eget sed posuere dui risus habitasse mauris.  Pretium vehicula pretium posuere justo sed lorem cursus.",
-      name: "David Oshodi",
-      role: "Manager",
-      avatar: "/images/img_user_thumb_1.png",
-      bgColor: "#e7f7ff",
-      cardBg: "#f3fbff"
-    }
-  ];
-
   return (
-    <section className="w-full bg-background-main section-spacing">
-      <Container className="px-4 sm:px-6 lg:px-9">
-        <div className="flex flex-col gap-8 sm:gap-12 lg:gap-20 items-center">
-          {/* Section Header */}
-          <div className="text-center">
-            <h2 className="type-h1 font-medium font-inter">
-              <span className="text-text-primary">What our </span>
-              <span className="text-text-accent">Customers say about us!</span>
-            </h2>
-          </div>
+    <section className="w-full section-spacing bg-white">
+      <Container>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="type-h2 font-semibold text-gray-800">
+            What our{" "}
+            <span className="text-[#019de3]">Customers say</span>
+          </h2>
+          <p className="type-body text-gray-500 mt-3">
+            Thousands of happy customers trust EasyBeema for their insurance needs.
+          </p>
+        </div>
 
-          {/* Testimonials Container */}
-          <div className="w-full relative">
-            {/* Background Circle removed to avoid overlay on third card */}
-
-            {/* Testimonials Grid */}
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-6 px-4 sm:px-8 lg:px-[76px]">
-              {testimonials?.map((testimonial, index) => (
-                <div
-                  key={testimonial?.id}
-                  className={`w-full lg:w-[384px] rounded-md ${index === 0 ? 'mt-9 mb-9' : index === 2 ? 'mt-4 mb-4' : ''}`}
-                  style={{ background: testimonial?.bgColor }}
-                >
-                  <div
-                    className="w-full h-full rounded-md p-6 sm:p-7 lg:p-8 flex flex-col gap-6 sm:gap-7 lg:gap-8"
-                    style={{ backgroundColor: testimonial?.cardBg }}
-                  >
-                    {/* Testimonial Text */}
-                    <p className="type-body-lg font-normal leading-relaxed text-text-primary font-roboto">
-                      {testimonial?.text}
-                    </p>
-
-                    {/* User Info */}
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <img
-                        src={testimonial?.avatar}
-                        alt={testimonial?.name}
-                        className="w-12 sm:w-14 lg:w-16 h-12 sm:h-14 lg:h-16 rounded-full object-cover"
-                      />
-                      <div className="flex flex-col gap-1">
-                        <h4 className="type-body font-normal leading-relaxed text-text-primary font-roboto">
-                          {testimonial?.name}
-                        </h4>
-                        <p className="type-small font-normal leading-snug text-text-primary font-roboto">
-                          {testimonial?.role}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+        {/* Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t) => (
+            <div
+              key={t.id}
+              className="bg-[#f8fbff] border border-[#e0f0fa] rounded-xl p-6 flex flex-col gap-4 hover:shadow-md transition-shadow duration-200"
+            >
+              <StarRating />
+              <p className="type-body text-gray-600 leading-relaxed flex-1">"{t.text}"</p>
+              <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.role}</p>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </Container>
     </section>

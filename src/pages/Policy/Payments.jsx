@@ -1,50 +1,18 @@
-// File: src/pages/Policy/Payments.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { PRODUCT_TITLES } from "../../constants/insurance";
 
-/* --- Demo constants --- */
-const PRODUCT_TITLES = {
-  "1": "Term Life Insurance",
-  "2": "Health Insurance",
-  "3": "Car Insurance",
-  "4": "Family Insurance",
-  "5": "Investment Plans",
-  "6": "Travel Insurance",
-  "7": "Term Insurance (Women)",
-  "8": "2 Wheeler Insurance",
-};
-
-const PLANS_DEMO = [
-  {
-    id: "1",
-    vendor: "HDFC Life",
-    vendorLogo: "/images/HDFCinsurance.png",
-    title: "C2P Supreme - WOMEN SECURE SOLUTION",
-    priceMonthly: 988,
-    priceYearly: 988 * 12 - 500,
-    originalMonthly: 1129,
-  },
-  {
-    id: "2",
-    vendor: "C2P",
-    vendorLogo: "/images/EasyBeema.png",
-    title: "Term Secure - FAMILY PROTECT",
-    priceMonthly: 1391,
-    priceYearly: 1391 * 12 - 800,
-    originalMonthly: 1594,
-  },
-];
-
+/* ── Static data ── */
 const PLAN_FEATURES = [
-  "Death benefit - sum assured to nominees",
-  "Terminal illness benefit",
-  "Optional riders available",
-  "Simple digital onboarding",
+  "Death benefit — sum assured paid to nominees",
+  "Terminal illness benefit included",
+  "Optional riders available at low cost",
+  "Simple 100% digital onboarding",
 ];
 
 const FREE_BENEFITS = [
-  "Free-look 30 days",
-  "Instant claim support (24x7)",
+  "Free-look period: 30 days",
+  "Instant claim support (24×7)",
   "E-policy delivery",
   "Priority customer support",
 ];
@@ -59,12 +27,12 @@ const LIFE_STAGE_BENEFITS = [
 const PAID_BENEFITS = [
   "Critical illness rider",
   "Accidental death benefit",
-  "Hospital cash rider (paid)",
+  "Hospital cash rider",
   "Premium waiver on disability",
 ];
 
 const UPGRADE_PLANS = [
-  { id: "u1", label: "Increase cover to 2 Crore", costMonthly: 350 },
+  { id: "u1", label: "Increase cover to ₹2 Crore", costMonthly: 350 },
   { id: "u2", label: "Add Family Income Benefit", costMonthly: 220 },
 ];
 
@@ -74,285 +42,9 @@ const ADD_ON_RIDERS = [
   { id: "r3", label: "Hospital Cash Rider", costMonthly: 60 },
 ];
 
-/* helper */
 const fmt = (n) => (typeof n === "number" ? n.toLocaleString("en-IN") : n);
 
-/* --- Payments component (full) --- */
-export default function Payments() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const state = location.state || {};
-
-  // Profile & navigation state
-  const profile = state.form || { name: "", dob: "", mobile: "" };
-  const gender = state.gender || profile.gender || "";
-  const smoke = state.smoke !== undefined ? state.smoke : null;
-  const survey = state.survey || {};
-
-  // Accept product id from multiple possible places
-  const incomingProductId = state?.productId ?? state?.planId ?? state?.plan?.id ?? null;
-
-  // activePlan: prefer full plan object in state; else find by id; else fallback to first demo
-  const activePlan =
-    state?.plan ??
-    (incomingProductId ? PLANS_DEMO.find((p) => String(p.id) === String(incomingProductId)) : null) ??
-    PLANS_DEMO[0];
-
-  // productTitle: compute early so handlers can use it safely
-  const productTitle =
-    state?.productTitle ?? activePlan?.title ?? (incomingProductId ? PRODUCT_TITLES[String(incomingProductId)] : null) ?? "Insurance Product";
-
-  // UI state
-  const [lifeCover, setLifeCover] = useState("₹1 Crore");
-  const [coverTill, setCoverTill] = useState("60 Years");
-  const [payFor, setPayFor] = useState("33 Years");
-  const [mode, setMode] = useState(state?.billingCycle || "Monthly"); // Monthly / Yearly
-
-  const [tab, setTab] = useState("features"); // features | free | life-stage | paid
-  const [selectedUpgrades, setSelectedUpgrades] = useState(state?.selectedUpgrades || {});
-  const [selectedRiders, setSelectedRiders] = useState(state?.selectedRiders || {});
-  const [userForm, setUserForm] = useState({
-    fullName: profile.name || "",
-    email: profile.email || "",
-    occupation: survey?.occupation || "",
-    annualIncome: survey?.income || "",
-    education: survey?.education || "",
-    dob: profile.dob || "",
-    mobile: profile.mobile || "",
-  });
-
-  // Payment flow state
-  const [isPaying, setIsPaying] = useState(false);
-  const mainRef = useRef(null);
-
-  // price computation
-  const baseMonthly = activePlan?.priceMonthly || 0;
-  const baseYearly = activePlan?.priceYearly || baseMonthly * 12;
-  const upgradesMonthly = Object.keys(selectedUpgrades).reduce((sum, k) => sum + (selectedUpgrades[k] ? UPGRADE_PLANS.find(u => u.id === k)?.costMonthly || 0 : 0), 0);
-  const ridersMonthly = Object.keys(selectedRiders).reduce((sum, k) => sum + (selectedRiders[k] ? ADD_ON_RIDERS.find(r => r.id === k)?.costMonthly || 0 : 0), 0);
-
-  const effectiveMonthly = baseMonthly + upgradesMonthly + ridersMonthly;
-  const effectiveYearly = baseYearly + (upgradesMonthly + ridersMonthly) * 12;
-
-  const displayedPrice = mode === "Monthly" ? effectiveMonthly : effectiveYearly;
-  const displayedCycleLabel = mode === "Monthly" ? "/month" : "/year";
-
-  useEffect(() => {
-    mainRef.current?.focus();
-  }, []);
-
-  function toggleUpgrade(id) {
-    setSelectedUpgrades(prev => ({ ...prev, [id]: !prev[id] }));
-  }
-  function toggleRider(id) {
-    setSelectedRiders(prev => ({ ...prev, [id]: !prev[id] }));
-  }
-
-  // Proceed: validate & navigate to confirmation page
-  function handleProceed() {
-    if (!userForm.fullName || !userForm.mobile) {
-      alert("Please fill your name and mobile before proceeding.");
-      return;
-    }
-
-    const payload = {
-      form: {
-        name: userForm.fullName,
-        email: userForm.email,
-        mobile: userForm.mobile,
-        dob: userForm.dob,
-        occupation: userForm.occupation,
-        annualIncome: userForm.annualIncome,
-        education: userForm.education,
-      },
-      gender,
-      smoke,
-      survey,
-      productId: incomingProductId,
-      productTitle,
-      plan: activePlan,
-      billingCycle: mode,
-      price: displayedPrice,
-      selectedUpgrades,
-      selectedRiders,
-    };
-
-    // navigate to confirmation UI (create a /confirm route to receive this)
-    navigate("/confirm", { state: payload });
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f8fbff] px-6 py-8">
-      <div className="max-w-[1200px] mx-auto" ref={mainRef} tabIndex={-1}>
-        {/* Header */}
-        <header className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <img src="/images/EasyBeema.png" alt="logo" className="h-12" />
-            <div className="text-sm text-gray-600">
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 12a5 5 0 100-10 5 5 0 000 10zM2 22a10 10 0 0120 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span className="font-medium">{gender === "FEMALE" ? "Female" : gender === "MALE" ? "Male" : "Other"}</span>
-                <span className="text-gray-400">|</span>
-                <span className="text-sm">DOB: {userForm.dob || "—"}</span>
-                <span className="text-gray-400">|</span>
-                <span className="text-sm">{smoke === true ? "Smoker" : smoke === false ? "Non Smoker" : "—"}</span>
-                <span className="text-gray-400">|</span>
-                <span className="text-sm">******{(userForm.mobile || "").slice(-4) || "----"}</span>
-                <button className="ml-3 text-sm text-blue-600 underline" onClick={() => navigate(-1)}>Edit</button>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-right">
-            {/* product title shown on all sizes for easier debug/visibility */}
-            <div className="text-sm text-gray-500 mr-2">{productTitle}</div>
-            <button className="mt-2 bg-[#03a9f4] text-white px-4 py-2 rounded-md shadow" onClick={() => alert("Talk to expert (demo)")}>Talk to Expert</button>
-          </div>
-        </header>
-
-        {/* Grid */}
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left summary */}
-          <aside className="col-span-4">
-            <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px]">
-              <div className="flex items-start gap-3 mb-4">
-                <img src={activePlan?.vendorLogo || "/images/HDFCinsurance.png"} alt="vendor" className="h-10 w-auto" />
-                <div>
-                  <div className="text-gray-700 text-lg font-semibold">{activePlan?.title}</div>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-5">
-                <SelectRow label="Life Cover" value={lifeCover} onChangeValue={setLifeCover} options={["₹5 Lakh", "₹10 Lakh", "₹25 Lakh", "₹50 Lakh", "₹1 Crore", "₹2 Crore"]} />
-                <SelectRow label="Cover till Age" value={coverTill} onChangeValue={setCoverTill} options={["60 Years", "65 Years", "70 Years", "75 Years"]} />
-                <SelectRow label="Pay for" value={payFor} onChangeValue={setPayFor} options={["20 Years", "25 Years", "30 Years", "33 Years"]} />
-                <SelectRow label="Mode of Premium Payment" value={mode} onChangeValue={setMode} options={["Monthly", "Yearly"]} />
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                <div className="p-3 border rounded text-xs">
-                  <div className="text-lg font-semibold text-gray-800">99.3%</div>
-                  <div className="text-xs text-gray-500">claim settlement ratio</div>
-                </div>
-                <div className="p-3 border rounded text-xs">
-                  <div className="text-lg font-semibold text-gray-800">30 Days</div>
-                  <div className="text-xs text-gray-500">Easy Refund Policy</div>
-                </div>
-                <div className="p-3 border rounded text-xs">
-                  <div className="text-lg font-semibold text-gray-800">Insta</div>
-                  <div className="text-xs text-gray-500">Claim Settlement</div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Center tabs */}
-          <section className="col-span-4">
-            <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px] flex flex-col">
-              <nav className="flex items-center gap-6 border-b pb-3 mb-3 text-sm text-gray-600">
-                <Tab label="Plan Features" active={tab === "features"} onClick={() => setTab("features")} />
-                <Tab label="Free Benefits" active={tab === "free"} onClick={() => setTab("free")} />
-                <Tab label="Life Stage Benefits" active={tab === "life"} onClick={() => setTab("life")} />
-                <Tab label="Paid Benefits" active={tab === "paid"} onClick={() => setTab("paid")} />
-              </nav>
-
-              <div className="flex-1 overflow-auto">
-                {tab === "features" && <ListSection title="Plan Features" items={PLAN_FEATURES} />}
-                {tab === "free" && <ListSection title="Free Benefits" items={FREE_BENEFITS} />}
-                {tab === "life" && <ListSection title="Life Stage Benefits" items={LIFE_STAGE_BENEFITS} />}
-                {tab === "paid" && <ListSection title="Paid Benefits" items={PAID_BENEFITS} />}
-              </div>
-
-              <div className="mt-4 text-right">
-                <button onClick={() => setTab("paid")} className="bg-[#03a9f4] text-white px-4 py-2 rounded-md">Next</button>
-              </div>
-            </div>
-          </section>
-
-          {/* Right form / upgrades */}
-          <aside className="col-span-4 mb-20">
-            <div className="bg-white rounded-2xl border p-5 shadow min-h-[360px] flex flex-col gap-3">
-              <h4 className="text-lg font-medium">Your Details</h4>
-
-              <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Full Name as Per ID Proof" value={userForm.fullName} onChange={(e) => setUserForm({ ...userForm, fullName: e.target.value })} />
-              </label>
-
-              <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="E-mail Address" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} />
-              </label>
-
-              <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Occupation" value={userForm.occupation} onChange={(e) => setUserForm({ ...userForm, occupation: e.target.value })} />
-              </label>
-
-              <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Annual Income" value={userForm.annualIncome} onChange={(e) => setUserForm({ ...userForm, annualIncome: e.target.value })} />
-              </label>
-
-              <label className="block">
-                <input className="w-full border rounded px-3 py-2" placeholder="Education" value={userForm.education} onChange={(e) => setUserForm({ ...userForm, education: e.target.value })} />
-              </label>
-
-              <hr className="my-2" />
-
-              <h4 className="text-lg font-medium">Upgrade Plan</h4>
-              <div className="space-y-2">
-                {UPGRADE_PLANS.map(u => (
-                  <label key={u.id} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={!!selectedUpgrades[u.id]} onChange={() => toggleUpgrade(u.id)} />
-                    <span className="flex-1">{u.label}</span>
-                    <span className="text-sm text-gray-600">+ ₹{u.costMonthly}/mo</span>
-                  </label>
-                ))}
-              </div>
-
-              <hr className="my-2" />
-              <h4 className="text-lg font-medium">Add-On Riders</h4>
-              <div className="space-y-2">
-                {ADD_ON_RIDERS.map(r => (
-                  <label key={r.id} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={!!selectedRiders[r.id]} onChange={() => toggleRider(r.id)} />
-                    <span className="flex-1">{r.label}</span>
-                    <span className="text-sm text-gray-600">+ ₹{r.costMonthly}/mo</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        {/* Sticky footer */}
-        <div className="fixed left-0 right-0 bottom-0 bg-[#03a9f4] text-white p-4 shadow-lg">
-          <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-            <div>
-              <div className="text-sm">Premium for 1st Year</div>
-              <div className="text-lg font-semibold">Rs. {fmt(displayedPrice)} {displayedCycleLabel}</div>
-              <div className="text-xs opacity-90">Premium for 2nd Year onwards Rs. {fmt(activePlan?.originalMonthly || Math.round(activePlan?.priceMonthly * 1.15))}/Monthly</div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate(-1)} className="bg-white text-[#03a9f4] px-4 py-2 rounded-md font-medium">Go Back</button>
-              <div className="bg-white rounded-md px-4 py-1 flex items-center gap-3">
-                <div className="bg-[#03a9f4] px-3 py-2 rounded-md font-medium">Rs. {fmt(displayedPrice)}{displayedCycleLabel}</div>
-                <button onClick={handleProceed} className="px-4 py-2 text-black bg-white border rounded-md" disabled={isPaying}>
-                  {isPaying ? "Processing..." : "Proceed"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-/* =================
-   Small subcomponents
-   ================= */
+/* ── Small reusable components ── */
 function SelectRow({ label, value, onChangeValue, options = [] }) {
   const [open, setOpen] = useState(false);
   return (
@@ -360,16 +52,19 @@ function SelectRow({ label, value, onChangeValue, options = [] }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full text-left px-3 py-2 border rounded flex items-center justify-between text-sm"
+        className="w-full text-left px-3 py-2.5 border border-gray-200 rounded-lg flex items-center justify-between text-sm hover:border-[#019de3] transition-colors"
       >
-        <span className="text-xs text-red-500 mr-2">{label}</span>
-        <span className="text-sm text-gray-700">{value} <span className="text-gray-300">▾</span></span>
+        <span className="text-xs text-[#019de3] font-medium mr-2">{label}</span>
+        <span className="text-gray-700">{value} <span className="text-gray-400 text-xs">▾</span></span>
       </button>
-
       {open && (
-        <div className="absolute left-0 mt-2 w-full bg-white border rounded shadow z-30">
-          {options.map(o => (
-            <div key={o} onClick={() => { onChangeValue(o); setOpen(false); }} className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm">
+        <div className="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-30">
+          {options.map((o) => (
+            <div
+              key={o}
+              onClick={() => { onChangeValue(o); setOpen(false); }}
+              className="px-3 py-2 hover:bg-[#f0faff] cursor-pointer text-sm text-gray-700"
+            >
               {o}
             </div>
           ))}
@@ -381,19 +76,235 @@ function SelectRow({ label, value, onChangeValue, options = [] }) {
 
 function Tab({ label, active, onClick }) {
   return (
-    <button type="button" onClick={onClick} className={`py-2 ${active ? "text-gray-900 font-semibold" : "text-gray-500"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`py-2 px-1 text-sm transition-colors border-b-2 ${
+        active ? "text-gray-900 font-semibold border-[#019de3]" : "text-gray-500 border-transparent hover:text-gray-700"
+      }`}
+    >
       {label}
     </button>
   );
 }
 
-function ListSection({ title, items = [] }) {
+function ListSection({ items = [] }) {
   return (
-    <div>
-      <h4 className="text-md font-medium mb-3">{title}</h4>
-      <ul className="space-y-2 text-sm text-gray-700">
-        {items.map((it, i) => <li key={i} className="flex items-start gap-3"><span className="text-[#03a9f4] mt-1">•</span><span>{it}</span></li>)}
-      </ul>
+    <ul className="space-y-2 text-sm text-gray-600">
+      {items.map((it, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <span className="text-[#019de3] mt-0.5 font-bold">•</span>
+          <span>{it}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ── Main Payments component ── */
+export default function Payments() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state = location.state || {};
+  const mainRef = useRef(null);
+
+  const profile = state.form || { name: "", dob: "", mobile: "" };
+  const gender = state.gender || "";
+  const smoke = state.smoke !== undefined ? state.smoke : null;
+  const survey = state.survey || {};
+
+  const incomingProductId = state?.productId ?? state?.planId ?? state?.plan?.id ?? null;
+  const activePlan = state?.plan ?? { title: "Insurance Plan", priceMonthly: 988, priceYearly: 10000, vendorLogo: "/images/HDFCinsurance.png" };
+  const productTitle = state?.productTitle ?? activePlan?.title ?? (incomingProductId ? PRODUCT_TITLES[String(incomingProductId)] : null) ?? "Insurance Product";
+
+  // UI state
+  const [lifeCover, setLifeCover] = useState("₹1 Crore");
+  const [coverTill, setCoverTill] = useState("60 Years");
+  const [payFor, setPayFor] = useState("33 Years");
+  const [mode, setMode] = useState(state?.billingCycle || "Monthly");
+  const [tab, setTab] = useState("features");
+  const [selectedUpgrades, setSelectedUpgrades] = useState({});
+  const [selectedRiders, setSelectedRiders] = useState({});
+  const [userForm, setUserForm] = useState({
+    fullName: profile.name || "",
+    email: profile.email || "",
+    occupation: survey?.occupation || "",
+    annualIncome: survey?.income || "",
+    education: survey?.education || "",
+    dob: profile.dob || "",
+    mobile: profile.mobile || "",
+  });
+
+  useEffect(() => { mainRef.current?.focus(); }, []);
+
+  // Price computation
+  const base = mode === "Monthly" ? activePlan?.priceMonthly || 0 : activePlan?.priceYearly || 0;
+  const upgradesTotal = Object.keys(selectedUpgrades).reduce(
+    (sum, k) => sum + (selectedUpgrades[k] ? (UPGRADE_PLANS.find((u) => u.id === k)?.costMonthly || 0) : 0), 0
+  );
+  const ridersTotal = Object.keys(selectedRiders).reduce(
+    (sum, k) => sum + (selectedRiders[k] ? (ADD_ON_RIDERS.find((r) => r.id === k)?.costMonthly || 0) : 0), 0
+  );
+  const displayedPrice = base + (mode === "Monthly" ? upgradesTotal + ridersTotal : (upgradesTotal + ridersTotal) * 12);
+
+  const toggleUpgrade = (id) => setSelectedUpgrades((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleRider = (id) => setSelectedRiders((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const handleProceed = () => {
+    if (!userForm.fullName || !userForm.mobile) {
+      alert("Please fill in your name and mobile number.");
+      return;
+    }
+    navigate("/confirm", {
+      state: {
+        form: userForm,
+        gender, smoke, survey,
+        productId: incomingProductId,
+        productTitle,
+        plan: activePlan,
+        billingCycle: mode,
+        price: displayedPrice,
+        selectedUpgrades,
+        selectedRiders,
+      },
+    });
+  };
+
+  const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#019de3] focus:border-transparent";
+
+  return (
+    <div className="min-h-screen bg-[#f8fbff] px-4 py-8 pb-28">
+      <div className="max-w-[1100px] mx-auto" ref={mainRef} tabIndex={-1}>
+
+        {/* Header */}
+        <header className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <img src="/images/EasyBeema.png" alt="logo" className="h-11" />
+            </Link>
+            <div className="text-sm text-gray-600 flex items-center gap-3">
+              <span className="font-medium">{gender || "—"}</span>
+              <span className="text-gray-300">|</span>
+              <span>DOB: {userForm.dob || "—"}</span>
+              <span className="text-gray-300">|</span>
+              <span>{smoke === true ? "Smoker" : smoke === false ? "Non-Smoker" : "—"}</span>
+              <button className="ml-2 text-xs text-[#019de3] underline" onClick={() => navigate(-1)}>Edit</button>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400">{productTitle}</p>
+            <button
+              className="mt-1 bg-[#019de3] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0289c7] transition-colors"
+              onClick={() => alert("Talk to expert (demo)")}
+            >
+              Talk to Expert
+            </button>
+          </div>
+        </header>
+
+        {/* 3-column grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+          {/* Left — plan summary */}
+          <aside className="lg:col-span-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-5">
+                <img src={activePlan?.vendorLogo || "/images/HDFCinsurance.png"} alt="vendor" className="h-10 w-auto" />
+                <p className="text-sm font-semibold text-gray-700 leading-snug">{activePlan?.title}</p>
+              </div>
+
+              <div className="flex flex-col gap-3 mb-5">
+                <SelectRow label="Life Cover" value={lifeCover} onChangeValue={setLifeCover} options={["₹5 Lakh", "₹10 Lakh", "₹25 Lakh", "₹50 Lakh", "₹1 Crore", "₹2 Crore"]} />
+                <SelectRow label="Cover Till Age" value={coverTill} onChangeValue={setCoverTill} options={["60 Years", "65 Years", "70 Years", "75 Years"]} />
+                <SelectRow label="Pay For" value={payFor} onChangeValue={setPayFor} options={["20 Years", "25 Years", "30 Years", "33 Years"]} />
+                <SelectRow label="Premium Mode" value={mode} onChangeValue={setMode} options={["Monthly", "Yearly"]} />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {[
+                  { value: "99.3%", label: "Claim Settlement" },
+                  { value: "30 Days", label: "Easy Refund" },
+                  { value: "Instant", label: "Claim Process" },
+                ].map((s) => (
+                  <div key={s.label} className="p-2 border border-gray-100 rounded-lg">
+                    <div className="text-sm font-bold text-gray-800">{s.value}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Center — plan tabs */}
+          <section className="lg:col-span-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col">
+              <nav className="flex gap-4 border-b border-gray-100 pb-2 mb-4 overflow-x-auto">
+                <Tab label="Plan Features" active={tab === "features"} onClick={() => setTab("features")} />
+                <Tab label="Free Benefits" active={tab === "free"} onClick={() => setTab("free")} />
+                <Tab label="Life Stage" active={tab === "life"} onClick={() => setTab("life")} />
+                <Tab label="Paid Benefits" active={tab === "paid"} onClick={() => setTab("paid")} />
+              </nav>
+              <div className="flex-1">
+                {tab === "features" && <ListSection items={PLAN_FEATURES} />}
+                {tab === "free" && <ListSection items={FREE_BENEFITS} />}
+                {tab === "life" && <ListSection items={LIFE_STAGE_BENEFITS} />}
+                {tab === "paid" && <ListSection items={PAID_BENEFITS} />}
+              </div>
+            </div>
+          </section>
+
+          {/* Right — user details + add-ons */}
+          <aside className="lg:col-span-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Your Details</h4>
+              <input className={inputClass} placeholder="Full Name (as per ID)" value={userForm.fullName} onChange={(e) => setUserForm({ ...userForm, fullName: e.target.value })} />
+              <input className={inputClass} placeholder="Email Address" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} />
+              <input className={inputClass} placeholder="Occupation" value={userForm.occupation} onChange={(e) => setUserForm({ ...userForm, occupation: e.target.value })} />
+              <input className={inputClass} placeholder="Annual Income" value={userForm.annualIncome} onChange={(e) => setUserForm({ ...userForm, annualIncome: e.target.value })} />
+
+              <hr className="border-gray-100" />
+
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Upgrade Plan</h4>
+              {UPGRADE_PLANS.map((u) => (
+                <label key={u.id} className="flex items-center gap-3 text-sm cursor-pointer">
+                  <input type="checkbox" checked={!!selectedUpgrades[u.id]} onChange={() => toggleUpgrade(u.id)} className="accent-[#019de3] w-4 h-4" />
+                  <span className="flex-1 text-gray-600">{u.label}</span>
+                  <span className="text-gray-400 text-xs">+₹{u.costMonthly}/mo</span>
+                </label>
+              ))}
+
+              <hr className="border-gray-100" />
+
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Add-On Riders</h4>
+              {ADD_ON_RIDERS.map((r) => (
+                <label key={r.id} className="flex items-center gap-3 text-sm cursor-pointer">
+                  <input type="checkbox" checked={!!selectedRiders[r.id]} onChange={() => toggleRider(r.id)} className="accent-[#019de3] w-4 h-4" />
+                  <span className="flex-1 text-gray-600">{r.label}</span>
+                  <span className="text-gray-400 text-xs">+₹{r.costMonthly}/mo</span>
+                </label>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {/* Sticky footer bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#019de3] text-white shadow-xl z-40">
+        <div className="max-w-[1100px] mx-auto flex items-center justify-between px-6 py-4">
+          <div>
+            <p className="text-xs opacity-80">Premium for 1st Year</p>
+            <p className="text-lg font-bold">₹{fmt(displayedPrice)} <span className="text-sm font-normal">{mode === "Monthly" ? "/month" : "/year"}</span></p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate(-1)} className="bg-white text-[#019de3] px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+              Go Back
+            </button>
+            <button onClick={handleProceed} className="bg-white text-[#019de3] px-6 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+              Proceed →
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

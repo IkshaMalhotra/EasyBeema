@@ -1,385 +1,392 @@
-import { number } from "prop-types";
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { PRODUCT_TITLES } from "../../constants/insurance";
 
 export default function PolicyDetails() {
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const [gender, setGender] = useState("MALE");
-    const [smoke, setSmoke] = useState(null);
-    const [form, setForm] = useState({ name: "", dob: "", mobile: "" });
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [showSurvey, setShowSurvey] = useState(false);
-    const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [gender, setGender] = useState("MALE");
+  const [smoke, setSmoke] = useState(null);
+  const [form, setForm] = useState({ name: "", dob: "", mobile: "" });
+  const [errors, setErrors] = useState({ name: "", dob: "", mobile: "" });
+  const [showSurvey, setShowSurvey] = useState(false);
 
-    const handleOpenSurvey = (e) => {
-        e.preventDefault();
-        // Optionally validate form here before showing survey
-        setShowSurvey(true);
-    };
+  // Validation functions
+  const validateName = (name) => {
+    if (!name.trim()) return "Name is required";
+    if (name.length < 2) return "Name must be at least 2 characters long";
+    if (!/^[a-zA-Z\s\-']+$/.test(name)) return "Name can only contain letters, spaces, hyphens, and apostrophes";
+    return "";
+  };
 
-    return (
+  const validateDOB = (dob) => {
+    if (!dob) return "Date of birth is required";
+    
+    // Check format DD/MM/YYYY
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = dob.match(dateRegex);
+    if (!match) return "Please enter date in DD/MM/YYYY format";
+    
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    
+    // Check valid date
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      return "Please enter a valid date";
+    }
+    
+    // Check age (18-80 years)
+    const today = new Date();
+    const age = today.getFullYear() - year - (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day) ? 1 : 0);
+    
+    if (age < 18) return "You must be at least 18 years old";
+    if (age > 80) return "Age must be 80 years or less";
+    
+    return "";
+  };
 
-        <div className="min-h-screen bg-gradient-to-b from-primary-light to-white flex items-start">
-            <div className="w-full max-w-6xl mx-auto px-6 py-10">
-                {/* Header area inside page (site header is handled by MainLayout) */}
-                <header className="w-full shadow-sm flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-2">
-                        <a href="/">
-                            <img
-                                src="/images/EasyBeema.png"
-                                alt="EasyBeema Logo"
-                                className="h-12 w-auto"
-                            />
-                        </a>
-                    </div>
+  const validateMobile = (mobile) => {
+    if (!mobile) return "Mobile number is required";
+    
+    // Remove any spaces or special characters
+    const cleanMobile = mobile.replace(/\s+/g, '');
+    
+    // Check if it's a valid 10-digit number
+    if (!/^\d{10}$/.test(cleanMobile)) return "Mobile number must be exactly 10 digits";
+    
+    // Check if it starts with valid Indian mobile prefixes
+    const validPrefixes = ['6', '7', '8', '9'];
+    if (!validPrefixes.includes(cleanMobile.charAt(0))) {
+      return "Mobile number must start with 6, 7, 8, or 9";
+    }
+    
+    return "";
+  };
 
-                    <button
-                        className="lg:hidden p-2"
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        <svg
-                            className="w-6 h-6 text-gray-800"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
-                    </button>
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    let validatedValue = value;
+    
+    // Apply field-specific validation and formatting
+    if (name === 'name') {
+      // Allow only letters, spaces, hyphens, apostrophes
+      validatedValue = value.replace(/[^a-zA-Z\s\-']/g, '');
+      setErrors({ ...errors, name: validateName(validatedValue) });
+    } else if (name === 'dob') {
+      // Format date input
+      let formatted = value.replace(/\D/g, '');
+      if (formatted.length >= 2) {
+        formatted = formatted.slice(0, 2) + '/' + formatted.slice(2);
+      }
+      if (formatted.length >= 5) {
+        formatted = formatted.slice(0, 5) + '/' + formatted.slice(5, 9);
+      }
+      validatedValue = formatted.slice(0, 10);
+      setErrors({ ...errors, dob: validateDOB(validatedValue) });
+    } else if (name === 'mobile') {
+      // Allow only digits and limit to 10 characters
+      validatedValue = value.replace(/\D/g, '').slice(0, 10);
+      setErrors({ ...errors, mobile: validateMobile(validatedValue) });
+    }
+    
+    setForm({ ...form, [name]: validatedValue });
+  };
 
-                    <nav
-                        className={`${menuOpen ? "flex flex-col space-y-4" : "hidden"
-                            } lg:flex lg:flex-row lg:items-center lg:space-x-8 absolute lg:static top-28 left-0 w-full lg:w-auto shadow-md lg:shadow-none p-6 lg:p-0 bg-white lg:bg-transparent`}
-                    >
-                        <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:ml-8 mt-4 lg:mt-0">
-                            <button className="px-4 py-2 rounded-sm bg-[#03a9f4] text-white font-medium shadow-sm">Talk to Expert</button>
-                            <button className="px-4 py-2 rounded-sm bg-[#03a9f4] text-white font-medium shadow-sm">Claim Assistance</button>
-                        </div>
-                    </nav>
+  const handleOpenSurvey = (e) => {
+    e.preventDefault();
+    
+    // Validate all fields before proceeding
+    const nameError = validateName(form.name);
+    const dobError = validateDOB(form.dob);
+    const mobileError = validateMobile(form.mobile);
+    
+    setErrors({ name: nameError, dob: dobError, mobile: mobileError });
+    
+    if (nameError || dobError || mobileError) {
+      return;
+    }
+    
+    setShowSurvey(true);
+  };
 
-                </header>
+  const productTitle = PRODUCT_TITLES[id] || "Insurance";
 
-                <h1 className="text-3xl font-semibold text-center mb-6">
-                    Rs. 1 Crore <span className="text-[#03a9f4]">life cover</span> starting from RS.400/month
-                </h1>
+  const inputClass =
+    "w-full rounded-xl border border-[#cceeff] px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#019de3] focus:border-transparent transition-all";
 
-                <main className="grid grid-cols-12 gap-8 items-center">
-                    <div className="col-span-5 flex justify-end">
-                        {/* Using the public images directory */}
-                        <img
-                            src="/images/img_insurancemarket.png"
-                            alt="hero"
-                            className="max-h-[520px] object-contain"
-                            style={{ transform: "translateY(8px)" }}
-                        />
-                    </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#e8f6fd] to-white">
+      <div className="w-full max-w-6xl mx-auto px-6 py-10">
 
-                    <div className="col-span-7">
-                        <div className="max-w-xl mx-auto">
-                            <div className="flex flex-wrap justify-center gap-6 ">
-                                {["MALE", "FEMALE", "OTHER"].map((g) => (
-                                    <button
-                                        key={g}
-                                        type="button"
-                                        onClick={() => setGender(g)}
-                                        className={`px-8 py-3 rounded-sm font-semibold transition-shadow focus:outline-none ${gender === g
-                                            ? "bg-[#059be8] text-white shadow-lg"
-                                            : "bg-[#09a6e7]/90 text-white/90"
-                                            }`}
-                                        aria-pressed={gender === g} required
-                                    >
-                                        {g}
-                                    </button>
-                                ))}
-                            </div>
+        {/* Page header */}
+        <header className="flex items-center justify-between mb-8">
+          <Link to="/">
+            <img src="/images/EasyBeema.png" alt="EasyBeema Logo" className="h-12 w-auto" />
+          </Link>
+          <div className="flex items-center gap-3">
+            <button className="px-4 py-2 rounded-lg bg-[#019de3] text-white text-sm font-medium hover:bg-[#0289c7] transition-colors">
+              Talk to Expert
+            </button>
+            <button className="px-4 py-2 rounded-lg border border-[#019de3] text-[#019de3] text-sm font-medium hover:bg-[#f0faff] transition-colors">
+              Claim Assistance
+            </button>
+          </div>
+        </header>
 
-                            <div className="backdrop-blur-sm rounded-3xl p-8 shadow-soft-pill border border-white/40">
-                                <form className="space-y-5" onSubmit={handleOpenSurvey}>
-                                    <label className="block">
-                                        <div className="text-gray-500 text-sm mb-2">Name</div>
-                                        <input
-                                            name="name"
-                                            value={form.name}
-                                            onChange={onChange}
-                                            placeholder="Enter your name"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
-                                        />
-                                    </label>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-center text-gray-800 mb-8">
+          Rs. 1 Crore <span className="text-[#019de3]">life cover</span> starting from ₹400/month
+        </h1>
 
-                                    <label className="block">
-                                        <div className="text-gray-500 text-sm mb-2">Date of Birth</div>
-                                        <input
-                                            name="dob"
-                                            value={form.dob}
-                                            onChange={onChange}
-                                            placeholder="DD/MM/YYYY"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
-                                        />
-                                    </label>
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-                                    <label className="block">
-                                        <div className="text-gray-500 text-sm mb-2">Mobile Number</div>
-                                        <input type="tel"
-                                            name="mobile"
-                                            value={form.mobile}
-                                            onChange={onChange}
-                                            placeholder="Enter your mobile number"
-                                            className="w-full rounded-xl border border-[#0ea5e9]/40 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#03a9f4]" required
-                                        />
-                                    </label>
-
-                                    <div className="flex items-center gap-4 text-gray-600 text-sm">
-                                        <div>Do You Smoke?</div>
-                                        <div className="flex items-center gap-3">
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="smoke"
-                                                    checked={smoke === true}
-                                                    onChange={() => setSmoke(true)}
-                                                    className="w-4 h-4 text-[#03a9f4]"
-                                                />
-                                                <span className="text-sm">YES</span>
-                                            </label>
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="smoke"
-                                                    checked={smoke === false}
-                                                    onChange={() => setSmoke(false)}
-                                                    className="w-4 h-4 text-[#03a9f4]"
-                                                />
-                                                <span className="text-sm">NO</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-4">
-                                        <button
-                                            type="submit"
-                                            className="w-full rounded-full py-4 text-lg font-medium bg-gradient-to-b from-white to-[#e6f6ff] shadow-xl border border-[#d0efff] hover:shadow-2xl"
-                                        >
-                                            VIEW PLANS
-                                        </button>
-                                    </div>
-
-                                    <p className="text-center text-xs text-gray-400 mt-3">
-                                        By Clicking, you agree to our Terms & Conditions, Privacy Policy
-                                    </p>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-
-            {/* SurveyPanel overlay */}
-            <SurveyPanel open={showSurvey} onClose={() => setShowSurvey(false)} navigate={navigate} formData={form} gender={gender} smoke={smoke} productId={id} />
-        </div>
-    );
-}
-
-function SurveyPanel({ open, onClose, navigate, formData, gender, smoke, productId }) {
-    if (!open) return null;
-    const [occupation, setOccupation] = useState(null);
-    const [income, setIncome] = useState(null);
-    const [education, setEducation] = useState(null);
-    const firstBtnRef = useRef(null);
-
-    // Escape key + focus + body scroll lock
-    useEffect(() => {
-        function handleKey(e) {
-            if (e.key === "Escape") onClose();
-        }
-        if (open) {
-            document.addEventListener("keydown", handleKey);
-            // focus first control after a tick for transition
-            setTimeout(() => firstBtnRef.current?.focus(), 80);
-            document.body.style.overflow = "hidden";
-        } else {
-            document.removeEventListener("keydown", handleKey);
-            document.body.style.overflow = "";
-        }
-        return () => {
-            document.removeEventListener("keydown", handleKey);
-            document.body.style.overflow = "";
-        };
-    }, [open, onClose]);
-
-    const handleContinue = () => {
-        // Navigate to Plans page with form data and survey results
-        const surveyData = { occupation, income, education };
-        navigate("/plans", {
-            state: {
-                form: formData,
-                gender,
-                smoke,
-                survey: surveyData,
-                productId
-            }
-        });
-    };
-
-    // Keep DOM in place for smooth animation; use pointer-events to control interactability
-    return (
-        <div
-            aria-hidden={!open}
-            className="fixed inset-0 z-50 flex items-start justify-center pointer-events-none"
-        >
-            {/* Backdrop */}
-            <div
-                onClick={onClose}
-                className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                    open ? "opacity-100 pointer-events-auto" : "opacity-0"
-                }`}
+          {/* Illustration */}
+          <div className="hidden lg:flex lg:col-span-5 justify-end">
+            <img
+              src="/images/img_insurancemarket.png"
+              alt="Insurance advisor"
+              className="max-h-[480px] object-contain"
             />
+          </div>
 
-            {/* Panel */}
-            <div className="relative pointer-events-none max-w-3xl w-full mx-4 mt-24">
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    className={`transform transition-all duration-300 pointer-events-auto bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden ${
-                        open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          {/* Form */}
+          <div className="col-span-12 lg:col-span-7">
+            <div className="max-w-xl mx-auto">
+
+              {/* Gender selector */}
+              <div className="flex justify-center gap-4 mb-6">
+                {["MALE", "FEMALE", "OTHER"].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all focus:outline-none ${
+                      gender === g
+                        ? "bg-[#019de3] text-white shadow-md"
+                        : "bg-white border border-[#019de3] text-[#019de3] hover:bg-[#f0faff]"
                     }`}
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-5 border-b">
-                        <div className="flex items-center gap-3">
-                            {/* use the uploaded graphic - path provided by you */}
-                            <h2 className="text-xl">Answer 3 simple Questions to move forward!</h2>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            aria-label="Close survey"
-                            className="text-gray-500 hover:text-gray-700 p-2 rounded-md focus:outline-none"
-                        >
-                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                                <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
+                    aria-pressed={gender === g}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
+              {/* Details form */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+                <form className="flex flex-col gap-4" onSubmit={handleOpenSurvey}>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Name</label>
+                    <input 
+                      name="name" 
+                      value={form.name} 
+                      onChange={onChange} 
+                      placeholder="Enter your full name" 
+                      className={`${inputClass} ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                      required 
+                    />
+                    {errors.name && <span className="text-xs text-red-600 mt-1">{errors.name}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Date of Birth</label>
+                    <input 
+                      name="dob" 
+                      value={form.dob} 
+                      onChange={onChange} 
+                      placeholder="DD/MM/YYYY" 
+                      className={`${inputClass} ${errors.dob ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                      maxLength="10"
+                      required 
+                    />
+                    {errors.dob && <span className="text-xs text-red-600 mt-1">{errors.dob}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Mobile Number</label>
+                    <input 
+                      type="tel" 
+                      name="mobile" 
+                      value={form.mobile} 
+                      onChange={onChange} 
+                      placeholder="Enter 10-digit mobile number" 
+                      className={`${inputClass} ${errors.mobile ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                      maxLength="10"
+                      required 
+                    />
+                    {errors.mobile && <span className="text-xs text-red-600 mt-1">{errors.mobile}</span>}
+                  </div>
+
+                  {/* Smoker question */}
+                  <div className="flex items-center gap-6 py-2">
+                    <span className="text-sm text-gray-600">Do You Smoke?</span>
+                    <div className="flex gap-4">
+                      {[{ label: "Yes", value: true }, { label: "No", value: false }].map((opt) => (
+                        <label key={opt.label} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="smoke"
+                            checked={smoke === opt.value}
+                            onChange={() => setSmoke(opt.value)}
+                            className="w-4 h-4 accent-[#019de3]"
+                          />
+                          <span className="text-sm text-gray-700">{opt.label}</span>
+                        </label>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Body */}
-                    <div className="p-8">
-                        {/* Occupation */}
-                        <div className="text-center mb-6">
-                            <p className="text-gray-500 tracking-wider uppercase">Choose your occupation type</p>
-                            <div className="flex justify-center gap-4 mt-4">
-                                <button
-                                    ref={firstBtnRef}
-                                    type="button"
-                                    onClick={() => setOccupation("SELF-EMPLOYED")}
-                                    className={`px-6 py-2 rounded-md border transition-colors ${
-                                        occupation === "SELF-EMPLOYED"
-                                            ? "bg-[#e9f7ff] border-[#0ea5e9] text-[#0ea5e9] shadow"
-                                            : "bg-white border-[#bfe7ff] text-gray-700"
-                                    }`}
-                                >
-                                    SELF–EMPLOYED
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setOccupation("SALARIED")}
-                                    className={`px-6 py-2 rounded-md border transition-colors ${
-                                        occupation === "SALARIED"
-                                            ? "bg-[#e9f7ff] border-[#0ea5e9] text-[#0ea5e9] shadow"
-                                            : "bg-white border-[#bfe7ff] text-gray-700"
-                                    }`}
-                                >
-                                    SALARIED EMPLOYEE
-                                </button>
-                            </div>
-                        </div>
+                  <button
+                    type="submit"
+                    className="w-full py-4 rounded-full text-base font-semibold bg-gradient-to-b from-white to-[#e6f6ff] border border-[#cceeff] shadow-md hover:shadow-lg transition-shadow mt-2"
+                  >
+                    VIEW PLANS →
+                  </button>
 
-                        <hr className="my-6 border-t border-gray-300" />
-
-                        {/* Income */}
-                        <div className="text-center mb-6">
-                            <p className="text-gray-500 tracking-wider uppercase">Choose your annual income</p>
-                            <div className="flex flex-wrap justify-center gap-4 mt-4">
-                                {[
-                                    { key: "LESS5", label: "Less than 5Lac" },
-                                    { key: "5-9.9", label: "5 Lac to 9.9 Lac" },
-                                    { key: "10-14.9", label: "10 Lac to 14.9 Lac" },
-                                    { key: "ABOVE15", label: "Above 15 Lac" },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.key}
-                                        onClick={() => setIncome(opt.key)}
-                                        className={`px-5 py-2 rounded-md border transition-colors ${
-                                            income === opt.key
-                                                ? "bg-[#e9f7ff] border-[#0ea5e9] text-[#0ea5e9] shadow"
-                                                : "bg-white border-[#bfe7ff] text-gray-700"
-                                        }`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <hr className="my-6 border-t border-gray-300" />
-
-                        {/* Education */}
-                        <div className="text-center mb-2">
-                            <p className="text-gray-500 tracking-wider uppercase">Choose your educational qualification</p>
-                            <div className="flex justify-center gap-4 mt-4">
-                                {[
-                                    { key: "GRAD", label: "GRADUATE" },
-                                    { key: "12TH", label: "12th PASS" },
-                                    { key: "10TH", label: "10th PASS" },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.key}
-                                        onClick={() => setEducation(opt.key)}
-                                        className={`px-6 py-2 rounded-md border transition-colors ${
-                                            education === opt.key
-                                                ? "bg-[#e9f7ff] border-[#0ea5e9] text-[#0ea5e9] shadow"
-                                                : "bg-white border-[#bfe7ff] text-gray-700"
-                                        }`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Footer actions */}
-                        <div className="mt-8 flex items-center justify-between gap-4">
-                            <button
-                                onClick={onClose}
-                                className="px-4 py-2 rounded-md border text-gray-600 hover:bg-gray-50"
-                            >
-                                Back
-                            </button>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={handleContinue}
-                                    disabled={!occupation || !income || !education}
-                                    className={`px-6 py-2 rounded-full font-medium transition disabled:opacity-50 ${
-                                        occupation && income && education
-                                            ? "bg-[#0ea5e9] text-white"
-                                            : "bg-[#e6f6ff] text-gray-400"
-                                    }`}
-                                >
-                                    Continue
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                  <p className="text-center text-xs text-gray-400">
+                    By clicking, you agree to our{" "}
+                    <span className="underline cursor-pointer">Terms & Conditions</span> and{" "}
+                    <span className="underline cursor-pointer">Privacy Policy</span>
+                  </p>
+                </form>
+              </div>
             </div>
-        </div>
-    );
+          </div>
+        </main>
+      </div>
+
+      {/* Survey overlay */}
+      <SurveyPanel
+        open={showSurvey}
+        onClose={() => setShowSurvey(false)}
+        navigate={navigate}
+        formData={form}
+        gender={gender}
+        smoke={smoke}
+        productId={id}
+      />
+    </div>
+  );
 }
 
+/* Survey panel — shown as an overlay after form submit */
+function SurveyPanel({ open, onClose, navigate, formData, gender, smoke, productId }) {
+  const [occupation, setOccupation] = useState(null);
+  const [income, setIncome] = useState(null);
+  const [education, setEducation] = useState(null);
+  const firstBtnRef = useRef(null);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleKey);
+    document.body.style.overflow = "hidden";
+    setTimeout(() => firstBtnRef.current?.focus(), 80);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = "";
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const handleContinue = () => {
+    navigate("/plans", {
+      state: { form: formData, gender, smoke, survey: { occupation, income, education }, productId },
+    });
+  };
+
+  const optionBtn = (selected, value, label, setter) => (
+    <button
+      key={value}
+      type="button"
+      onClick={() => setter(value)}
+      className={`px-5 py-2 rounded-lg border text-sm transition-colors ${
+        selected === value
+          ? "bg-[#e8f6fd] border-[#019de3] text-[#019de3] shadow-sm"
+          : "bg-white border-gray-200 text-gray-600 hover:border-[#019de3]"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center">
+      {/* Backdrop */}
+      <div onClick={onClose} className="absolute inset-0 bg-black/40" />
+
+      {/* Panel */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-2xl mx-4 mt-20 overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b">
+          <h2 className="text-lg font-semibold text-gray-800">Answer 3 quick questions to continue</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg" aria-label="Close">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 flex flex-col gap-6">
+
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Occupation Type</p>
+            <div className="flex flex-wrap gap-3">
+              {optionBtn(occupation, "SELF-EMPLOYED", "Self–Employed", setOccupation)}
+              {optionBtn(occupation, "SALARIED", "Salaried Employee", setOccupation)}
+            </div>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Annual Income</p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { key: "LESS5", label: "Less than ₹5L" },
+                { key: "5-9.9", label: "₹5L – ₹9.9L" },
+                { key: "10-14.9", label: "₹10L – ₹14.9L" },
+                { key: "ABOVE15", label: "Above ₹15L" },
+              ].map((opt) => optionBtn(income, opt.key, opt.label, setIncome))}
+            </div>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Educational Qualification</p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { key: "GRAD", label: "Graduate" },
+                { key: "12TH", label: "12th Pass" },
+                { key: "10TH", label: "10th Pass" },
+              ].map((opt) => optionBtn(education, opt.key, opt.label, setEducation))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 transition-colors">
+            Back
+          </button>
+          <button
+            onClick={handleContinue}
+            disabled={!occupation || !income || !education}
+            className="px-6 py-2 rounded-lg bg-[#019de3] text-white text-sm font-medium hover:bg-[#0289c7] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Continue →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

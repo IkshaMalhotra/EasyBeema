@@ -1,126 +1,117 @@
 import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
-import EditText from '../../components/ui/EditText';
-import TextArea from '../../components/ui/TextArea';
+import Container from '../../components/common/Container';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    message: ''
+    message: '',
   });
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleInputChange = (field) => (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e?.target?.value
-    }));
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleSubmit = (e) => {
-    e?.preventDefault();
-    // Handle form submission logic here
+    e.preventDefault();
+    // In a real app, you'd call an API here
+    setSubmitted(true);
   };
 
+  const inputClass =
+    "w-full px-4 py-3 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#019de3] focus:border-transparent transition-all";
+
   return (
-    <section className="w-full bg-white section-spacing">
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 lg:gap-16">
+    <section id="contact" className="w-full section-spacing bg-white">
+      <Container>
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-16">
 
-          {/* Contact Form */}
+          {/* Form */}
           <div className="w-full lg:w-1/2">
-            {/* Section Header */}
-            <h2 className="mb-6 text-xl sm:text-2xl lg:text-3xl font-medium text-text-accent font-inter">
-              Send us your query
-            </h2>
+            <h2 className="type-h2 font-semibold text-[#019de3] mb-2">Send us your query</h2>
+            <p className="type-body text-gray-500 mb-8">
+              Have a question about insurance? We're here to help. Our team typically responds within 24 hours.
+            </p>
 
-            <form onSubmit={handleSubmit} className="w-full max-w-[550px] space-y-5">
-              {/* Name Fields */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex flex-col w-full sm:w-1/2">
-                  <label className="text-sm font-medium text-text-primary mb-1">First name</label>
-                  <EditText
-                    placeholder="Jane"
-                    value={formData?.firstName}
-                    onChange={handleInputChange('firstName')}
-                    layout_width="100%"
-                    padding="20px"
-                    margin="16px 0"
-                    variant="default"
+            {submitted ? (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+                <div className="text-green-600 text-lg font-semibold mb-1">Message Sent! ✓</div>
+                <p className="text-sm text-gray-600">We'll get back to you within 24 hours.</p>
+                <button
+                  className="mt-4 text-sm text-[#019de3] underline"
+                  onClick={() => { setSubmitted(false); setFormData({ firstName: '', lastName: '', email: '', message: '' }); }}
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[520px]">
+                <div className="flex gap-4">
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">First Name</label>
+                    <input
+                      className={inputClass}
+                      placeholder="Jane"
+                      value={formData.firstName}
+                      onChange={handleChange('firstName')}
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Last Name</label>
+                    <input
+                      className={inputClass}
+                      placeholder="Smith"
+                      value={formData.lastName}
+                      onChange={handleChange('lastName')}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Email Address</label>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    placeholder="jane@example.com"
+                    value={formData.email}
+                    onChange={handleChange('email')}
+                    required
                   />
                 </div>
-                <div className="flex flex-col w-full sm:w-1/2">
-                  <label className="text-sm font-medium text-text-primary mb-1">Last name</label>
-                  <EditText
-                    placeholder="Smitherton"
-                    value={formData?.lastName}
-                    onChange={handleInputChange('lastName')}
-                    layout_width="100%"
-                    padding="20px"
-                    margin="16px 0"
-                    variant="default"
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Your Message</label>
+                  <textarea
+                    className={`${inputClass} resize-none`}
+                    placeholder="Tell us how we can help..."
+                    value={formData.message}
+                    onChange={handleChange('message')}
+                    rows={5}
+                    required
                   />
                 </div>
-              </div>
 
-              {/* Email Field */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-text-primary mb-1">Email address</label>
-                <EditText
-                  placeholder="email@janesfakedomain.net"
-                  type="email"
-                  value={formData?.email}
-                  onChange={handleInputChange('email')}
-                  layout_width="100%"
-                  padding="20px"
-                  margin="16px 0"
-                  variant="default"
-                />
-              </div>
-
-              {/* Message Field */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-text-primary mb-1">Your message</label>
-                <TextArea
-                  placeholder="Enter your question or message"
-                  value={formData?.message}
-                  onChange={handleInputChange('message')}
-                  rows={5}
-                  layout_width="100%"
-                  padding="20px"
-                  margin="16px 0"
-                  variant="default"
-                />
-              </div>
-
-
-              {/* Submit Button */}
-              <Button
-                text="Submit"
-                text_font_size="18px"
-                text_line_height="22px"
-                padding="14px"
-                type="submit"
-                className="w-full"
-                layout_width="100%"
-                variant="primary"
-              />
-            </form>
+                <Button text="Submit" type="submit" variant="primary" size="medium" className="w-full mt-2" />
+              </form>
+            )}
           </div>
 
-          {/* Illustration Image */}
+          {/* Illustration */}
           <div className="w-full lg:w-[40%] flex justify-center lg:justify-end">
             <img
               src="/images/img_insurancemarket_494x396.png"
-              alt="Contact support illustration"
-              className="w-[260px] h-[340px] sm:w-[300px] sm:h-[400px] lg:w-[360px] lg:h-[460px] object-contain"
+              alt="Customer support illustration"
+              className="w-[240px] sm:w-[300px] lg:w-[360px] h-auto object-contain"
             />
           </div>
         </div>
-      </div>
+      </Container>
     </section>
-
   );
 };
 

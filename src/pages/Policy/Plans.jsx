@@ -1,149 +1,109 @@
-// File: src/pages/Policy/Plans.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { PRODUCT_TITLES } from "../../constants/insurance";
 
-const PRODUCT_TITLES = {
-  "1": "Term Life Insurance",
-  "2": "Health Insurance",
-  "3": "Car Insurance",
-  "4": "Family Insurance",
-  "5": "Investment Plans",
-  "6": "Travel Insurance",
-  "7": "Term Insurance (Women)",
-  "8": "2 Wheeler Insurance",
-};
-
+// Plan data — in a real app this would come from an API
 export const PLANS = [
   {
     id: "1",
-    vendor: "C2P",
+    vendor: "HDFC Life",
     vendorLogo: "/images/HDFCinsurance.png",
-    title: "C2P Supreme - WOMEN SECURE SOLUTION",
+    title: "C2P Supreme – Women Secure Solution",
     tags: ["Cancer Cover Included"],
-    planOptions: ["Plan Details", "4 Free add-ons", "Full Refund"],
-
+    planOptions: ["Plan Details", "4 Free Add-ons", "Full Refund"],
     planDetails: [
       "Covers life risk up to ₹1 Crore",
       "Includes critical illness cover",
       "Flexible premium payment options",
       "High claim settlement ratio",
-      "Tax benefits under Section 80C"
+      "Tax benefits under Section 80C",
     ],
-
-    addons: [
-      "Accidental Death Benefit",
-      "Waiver of Premium",
-      "Critical Illness Rider",
-      "Hospital Cash Rider"
-    ],
-
+    addons: ["Accidental Death Benefit", "Waiver of Premium", "Critical Illness Rider", "Hospital Cash Rider"],
     refundPolicy: [
-      "Full refund available within 30 days of policy purchase",
+      "Full refund available within 30 days of purchase",
       "Premium returned if no claims are filed",
       "Cancellation charges may apply after 30 days",
-      "100% digital refund processing"
+      "100% digital refund processing",
     ],
-
     priceMonthly: 1391,
     priceYearly: 12685,
-    originalprice: 1594
+    originalprice: 1594,
   },
-
   {
     id: "2",
-    vendor: "C2P",
+    vendor: "HDFC Life",
     vendorLogo: "/images/HDFCinsurance.png",
-    title: "C2P Supreme - WOMEN SECURE SOLUTION",
+    title: "C2P Supreme – Family Protect Plan",
     tags: ["Cancer Cover Included"],
-    planOptions: ["Plan Details", "4 Free add-ons", "Full Refund"],
-
+    planOptions: ["Plan Details", "4 Free Add-ons", "Full Refund"],
     planDetails: [
       "Life cover up to ₹75 Lakhs",
       "Includes cancer protection benefit",
       "Low premium for non-smokers",
-      "Tax savings under 80C & 10(10D)"
+      "Tax savings under 80C & 10(10D)",
     ],
-
-    addons: [
-      "Accidental Disability Cover",
-      "Child Education Rider",
-      "Terminal Illness Rider",
-      "Premium Holiday Option"
-    ],
-
+    addons: ["Accidental Disability Cover", "Child Education Rider", "Terminal Illness Rider", "Premium Holiday Option"],
     refundPolicy: [
       "Free-look period: 30 days",
       "Full refund on early cancellation",
       "Instant refund to source account",
-      "Pro-rata deductions after 30 days"
+      "Pro-rata deductions after 30 days",
     ],
-
     priceMonthly: 1580,
     priceYearly: 12935,
-    originalprice: 1810
+    originalprice: 1810,
   },
-
   {
     id: "3",
     vendor: "HDFC Life",
     vendorLogo: "/images/HDFCinsurance.png",
-    title: "C2P Supreme - WOMEN SECURE SOLUTION",
+    title: "C2P Supreme – Comprehensive Cover",
     tags: ["Cancer Cover Included"],
-    planOptions: ["Plan Details", "4 Free add-ons", "Full Refund"],
-
+    planOptions: ["Plan Details", "4 Free Add-ons", "Full Refund"],
     planDetails: [
       "Coverage up to ₹1.5 Crore",
       "Special benefits for women",
       "Option to add maternity cover",
       "Zero paperwork digital onboarding",
-      "No medical exam for eligible customers"
+      "No medical exam for eligible customers",
     ],
-
-    addons: [
-      "Maternity Benefit Add-on",
-      "Cancer Care Booster",
-      "Accidental Total Disability Cover",
-      "Family Income Benefit Add-on"
-    ],
-
+    addons: ["Maternity Benefit Add-on", "Cancer Care Booster", "Accidental Total Disability Cover", "Family Income Benefit"],
     refundPolicy: [
       "Full refund within 30 days of purchase",
       "Premium reversal for policy cancellation",
       "Refund processed within 3–7 working days",
-      "Easy cancellation via mobile app"
+      "Easy cancellation via mobile app",
     ],
-
     priceMonthly: 1006,
     priceYearly: 15001,
-    originalprice: 1200
-  }
+    originalprice: 1200,
+  },
 ];
 
-function Modal({ open, onClose, title, items }) {
+/* ── Modal for plan details, add-ons, refund policy ── */
+function InfoModal({ open, onClose, title, items }) {
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl animate-fadeIn">
-
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">{title}</h2>
-
-        <ul className="space-y-3">
-          {items.map((item, index) => (
-            <li
-              key={index}
-              className="text-gray-600 text-sm border-b pb-2 last:border-none"
-            >
-              • {item}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative z-10 bg-white w-full max-w-md rounded-2xl p-6 shadow-xl mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <ul className="space-y-2">
+          {items.map((item, i) => (
+            <li key={i} className="flex gap-2 text-sm text-gray-600">
+              <span className="text-[#019de3] mt-0.5">•</span>
+              <span>{item}</span>
             </li>
           ))}
         </ul>
-
-        <button
-          className="mt-6 w-full bg-[#03a9f4] text-white py-2 rounded-lg hover:bg-[#0288d1]"
-          onClick={onClose}
-        >
+        <button className="mt-6 w-full bg-[#019de3] text-white py-2.5 rounded-lg hover:bg-[#0289c7] text-sm font-medium" onClick={onClose}>
           Close
         </button>
       </div>
@@ -151,151 +111,113 @@ function Modal({ open, onClose, title, items }) {
   );
 }
 
-// Replace your existing PaymentPopup with this exact function
+/* ── Payment popup shown when user clicks the arrow on a plan card ── */
 function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
-  // Hooks must be at top level of component
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Local UI state
   const [cycle, setCycle] = useState(initialCycle);
-  const [years, setYears] = useState(33); // demo selector
+  const [years, setYears] = useState(33);
   const ref = useRef(null);
 
-  // Read any state passed via navigate(...) from previous pages
-  // (PolicyDetails / Plans) — fallback to empty objects
   const incomingState = location.state || {};
-  const formData = incomingState.form || {};
-  const gender = incomingState.gender ?? incomingState?.form?.gender ?? null;
-  const smoke = incomingState.smoke ?? incomingState?.form?.smoke ?? null;
-  const surveyData = incomingState.survey || {};
-  const productId = incomingState.productId || incomingState.planId || plan?.id;
 
-  // compute demo totals
   const monthly = plan?.priceMonthly ?? 0;
   const yearly = plan?.priceYearly ?? monthly * 12;
   const totalPay = cycle === "monthly" ? (monthly * 12).toLocaleString() : yearly.toLocaleString();
 
-  // focus, escape handling, body scroll lock
   useEffect(() => {
-    if (open) {
-      setTimeout(() => ref.current?.focus(), 50);
-      const onKey = (e) => { if (e.key === "Escape") onClose(); };
-      document.addEventListener("keydown", onKey);
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.removeEventListener("keydown", onKey);
-        document.body.style.overflow = "";
-      };
-    }
+    if (!open) return;
+    setTimeout(() => ref.current?.focus(), 50);
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [open, onClose]);
 
   if (!open) return null;
 
-  // Handler now uses navigate (hook at top-level) and variables available in scope
   const handleContinue = () => {
-    const payload = {
-      form: formData,
-      gender,
-      smoke,
-      survey: surveyData,
-      productId,
-      planId: plan?.id,
-      plan,               // pass plan object (title, prices, addons, etc.)
-      billingCycle: cycle,
-      yearsToCover: years,
-    };
-
-    // navigate to payments and pass payload
-    navigate("/payments", { state: payload });
-    // optionally close popup (navigate will change page anyway)
+    navigate("/payments", {
+      state: {
+        ...incomingState,
+        plan,
+        planId: plan?.id,
+        billingCycle: cycle,
+        yearsToCover: years,
+      },
+    });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-
       <div
         role="dialog"
         aria-modal="true"
         ref={ref}
         tabIndex={-1}
-        className="relative z-50 w-[320px] bg-white rounded-2xl shadow-2xl border p-6 mx-4"
-        aria-label="Pay now"
+        className="relative z-10 w-[320px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 mx-4 focus:outline-none"
       >
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold">Pay Now!</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 ml-2 p-1 rounded"
-            aria-label="Close payment"
-          >
-            ✕
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Pay Now</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1" aria-label="Close">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Price pill */}
-        <div className="mt-4 flex justify-center">
-          <div className="bg-[#f43f6b] text-white rounded-md px-4 py-2 text-lg font-semibold">
-            Rs. {cycle === "monthly" ? monthly : yearly}{" "}
-            <span className="text-xs font-normal">{cycle === "monthly" ? "/month" : "/year"}</span>
+        <div className="flex justify-center mb-4">
+          <div className="bg-[#f43f6b] text-white rounded-lg px-5 py-2 text-lg font-semibold">
+            ₹{cycle === "monthly" ? monthly : yearly}
+            <span className="text-xs font-normal ml-1">{cycle === "monthly" ? "/month" : "/year"}</span>
           </div>
         </div>
 
-        {/* cycle toggle + years */}
-        <div className="mt-4 flex items-center justify-center gap-3">
-          <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setCycle("monthly")}
-              className={`px-2 py-1 text-sm rounded-full ${cycle === "monthly" ? "bg-[#03a9f4] text-white" : "text-[#03a9f4]"}`}
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              onClick={() => setCycle("yearly")}
-              className={`px-3 py-1 text-sm rounded-full ${cycle === "yearly" ? "bg-[#03a9f4] text-white" : "text-[#03a9f4]"}`}
-            >
-              Yearly
-            </button>
+        {/* Cycle toggle + years */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center bg-gray-100 rounded-full p-1">
+            {["monthly", "yearly"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setCycle(c)}
+                className={`px-3 py-1.5 text-sm rounded-full capitalize transition-all ${
+                  cycle === c ? "bg-[#019de3] text-white shadow-sm" : "text-gray-600"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
           </div>
-
           <select
             value={years}
             onChange={(e) => setYears(Number(e.target.value))}
-            className="border rounded px-3 py-1 text-sm"
-            aria-label="Years to cover till"
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
           >
-            {[22, 25, 30, 33, 38, 45].map((a) => (
-              <option key={a} value={a}>{a} years</option>
-            ))}
+            {[22, 25, 30, 33, 38, 45].map((a) => <option key={a} value={a}>{a} yrs</option>)}
           </select>
-
-          {cycle === "monthly" && <div className="text-sm text-gray-600">x 12 Months</div>}
         </div>
 
-        <hr className="my-4" />
+        <hr className="my-4 border-gray-100" />
 
-        {/* Total pay */}
-        <div className="text-center">
-          <div className="text-sm text-gray-600">Total Pay</div>
-          <div className="mt-3 bg-[#f43f6b] text-white rounded-md px-4 py-2 text-lg font-semibold inline-block">
-            Rs. {totalPay}
+        <div className="text-center mb-5">
+          <p className="text-xs text-gray-500 mb-1">Total Pay (1 year)</p>
+          <div className="bg-[#f43f6b] text-white rounded-lg px-5 py-2 text-lg font-semibold inline-block">
+            ₹{totalPay}
           </div>
         </div>
 
-        {/* footer actions */}
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <div className="bg-[#03a9f4] text-white px-4 py-2 rounded-md">Rs. {cycle === "monthly" ? monthly : yearly}/{cycle === "monthly" ? "month" : "year"}</div>
+        <div className="flex gap-3">
+          <div className="flex-1 bg-[#019de3] text-white rounded-lg px-3 py-2 text-sm text-center font-medium">
+            ₹{cycle === "monthly" ? monthly : yearly}/{cycle === "monthly" ? "mo" : "yr"}
+          </div>
           <button
-            type="button"
             onClick={handleContinue}
-            className="px-4 py-2 rounded-md bg-white border"
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Proceed
+            Proceed →
           </button>
         </div>
       </div>
@@ -303,200 +225,145 @@ function PaymentPopup({ open, onClose, plan, initialCycle = "monthly" }) {
   );
 }
 
-/* PlanCard component */
+/* ── Individual plan card ── */
 function PlanCard({ plan, billingCycle }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
-  const [showPay, setShowPay] = useState(false); // FIXED: added missing showPay state
+  const [showPay, setShowPay] = useState(false);
 
   const openSection = (label) => {
     if (label === "Plan Details") {
-      setModalTitle("Plan Details");
-      setModalItems(plan.planDetails);
-    } else if (label.includes("Free add-ons")) {
-      setModalTitle("Free Add-ons Included");
-      setModalItems(plan.addons);
+      setModalTitle("Plan Details"); setModalItems(plan.planDetails);
+    } else if (label.toLowerCase().includes("add-on")) {
+      setModalTitle("Free Add-ons Included"); setModalItems(plan.addons);
     } else if (label === "Full Refund") {
-      setModalTitle("Refund Policy");
-      setModalItems(plan.refundPolicy);
-    } else {
-      setModalTitle(label);
-      setModalItems([]);
+      setModalTitle("Refund Policy"); setModalItems(plan.refundPolicy);
     }
     setModalOpen(true);
   };
 
-  const price =
-    billingCycle === "monthly" ? plan.priceMonthly : plan.priceYearly;
-  const originalprice = plan.originalprice;
-
+  const price = billingCycle === "monthly" ? plan.priceMonthly : plan.priceYearly;
   const cycleLabel = billingCycle === "monthly" ? "/month" : "/year";
 
   return (
     <>
-      {/* CARD UI */}
-      <article className="relative bg-white rounded-2xl border border-[#11111120] p-6 mb-6 shadow-sm">
+      <article className="relative bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
 
-        {/* Arrow (opens payment popup) */}
+        {/* Arrow button */}
         <button
           type="button"
-          aria-label="Pay now"
+          aria-label="Proceed to payment"
           onClick={() => setShowPay(true)}
-          className="absolute right-4 top-4 w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-white/90"
+          className="absolute right-4 top-4 w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 bg-white hover:bg-[#f0faff] hover:border-[#019de3] transition-colors"
         >
-          <div className="flex items-center">
-            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"></path>
-            </svg>
-          </div>
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </button>
 
         <div className="flex items-center gap-6">
-
           {/* Logo */}
-          <div className="flex-shrink-0 w-28 h-20 rounded-lg bg-white border border-gray-100 flex items-center justify-center p-3">
+          <div className="flex-shrink-0 w-28 h-20 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-3">
             <img src={plan.vendorLogo} alt={`${plan.vendor} logo`} className="max-h-full max-w-full object-contain" />
           </div>
 
-          {/* Middle */}
-          <div className="min-w-0 flex-1">
-            <h3 className="text-xl text-gray-700 font-medium leading-tight truncate">
-              {plan.title}
-            </h3>
-
-            <div className="mt-3 flex items-center gap-3 flex-wrap">
+          {/* Details */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-gray-700 leading-snug truncate pr-10">{plan.title}</h3>
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
               {plan.planOptions.map((opt, i) => (
                 <button
                   key={i}
-                  type="button"
                   onClick={() => openSection(opt)}
-                  className="px-3 py-2 border border-[#9ed7f5] rounded-md text-sm text-gray-600 bg-white hover:bg-[#f8fbff]"
+                  className="px-3 py-1.5 border border-[#cceeff] rounded-lg text-xs text-gray-600 bg-white hover:bg-[#f0faff] transition-colors"
                 >
                   {opt} ▾
                 </button>
               ))}
             </div>
-
-            <div className="mt-3">
-              <span className="text-sm text-purple-600">{plan.tags.join(" • ")}</span>
+            <div className="mt-2">
+              <span className="text-xs text-purple-500 font-medium">{plan.tags.join(" • ")}</span>
             </div>
           </div>
 
           {/* Price */}
-          <div className="flex flex-col items-end justify-between ml-4">
-            <div className="mb-2">
-              <div className="bg-[#f43f6b] text-white rounded-md px-4 py-3 text-sm font-semibold shadow-md">
-                Rs. {price} <span className="text-xs">{cycleLabel}</span>
-              </div>
-              <div className="w-24 h-[3px] bg-[#11182710] mt-2 rounded" />
+          <div className="flex-shrink-0 flex flex-col items-end">
+            <div className="bg-[#f43f6b] text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm">
+              ₹{price} <span className="text-xs font-normal">{cycleLabel}</span>
             </div>
-            <div className="text-xs text-gray-400 line-through">
-              Rs. {originalprice} incl. GST
-            </div>
+            <p className="text-xs text-gray-400 line-through mt-1">₹{plan.originalprice} incl. GST</p>
           </div>
         </div>
       </article>
 
-      {/* MODAL */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModalOpen(false)} />
-          <div className="relative z-50 w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
-            <div className="flex justify-between items-start">
-              <h3 className="text-lg font-semibold">{modalTitle}</h3>
-              <button onClick={() => setModalOpen(false)} className="text-gray-500">✕</button>
-            </div>
-            <ul className="mt-4 space-y-2 text-sm text-gray-700">
-              {modalItems.map((it, i) => <li key={i}>• {it}</li>)}
-            </ul>
-            <div className="mt-6">
-              <button onClick={() => setModalOpen(false)} className="w-full bg-[#03a9f4] text-white py-2 rounded-md">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* payment popup */}
+      <InfoModal open={modalOpen} onClose={() => setModalOpen(false)} title={modalTitle} items={modalItems} />
       <PaymentPopup open={showPay} onClose={() => setShowPay(false)} plan={plan} initialCycle={billingCycle} />
     </>
   );
 }
 
-/* Plans page */
+/* ── Plans page ── */
 export default function Plans() {
-  const { id } = useParams();
   const location = useLocation();
   const state = location.state || {};
-  const visiblePlans = PLANS;
   const [billingCycle, setBillingCycle] = useState("monthly");
-  const incomingProductId = state?.productId || id;
-  const productTitle = state?.productTitle || state?.plan?.title || (incomingProductId ? PRODUCT_TITLES[incomingProductId] : null) || "Insurance Product";
+
+  const incomingProductId = state?.productId;
+  const productTitle = PRODUCT_TITLES[incomingProductId] || "Insurance Plans";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-light to-white py-12 px-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-[#e8f6fd] to-white py-10 px-6">
+      <div className="max-w-5xl mx-auto">
+
         {/* Header */}
-        <header className="flex items-center justify-between mb-20">
-          <div className="flex items-center gap-6">
-            <img src="/images/EasyBeema.png" alt="Easy Beema" className="h-12" />
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+          <div className="flex items-center gap-5">
+            <Link to="/">
+              <img src="/images/EasyBeema.png" alt="EasyBeema" className="h-11" />
+            </Link>
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">
-                Best Plans <span className="text-[#03a9f4]">for you!</span>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Best Plans <span className="text-[#019de3]">for you!</span>
               </h1>
-              <p className="mt-1 text-sm text-gray-500">Recommended plans based on your selection</p>
+              <p className="text-sm text-gray-500 mt-0.5">Recommended based on your selection</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white">
-              <button type="button" className="px-4 py-2 text-sm text-gray-600">Life Cover ▾</button>
-              <button type="button" className="px-4 py-2 text-sm text-gray-600">Age to cover till ▾</button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-gray-500 mr-2 hidden md:block">
-                {productTitle}
-              </div>
-
-              {/* Toggle Container */}
-              <div className="flex items-center bg-white rounded-full border p-1 shadow-sm">
-
-                {/* Monthly */}
+          {/* Billing toggle */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">{productTitle}</span>
+            <div className="flex items-center bg-white rounded-full border border-gray-200 p-1 shadow-sm">
+              {["monthly", "yearly"].map((c) => (
                 <button
-                  type="button"
-                  onClick={() => setBillingCycle("monthly")}
-                  className={`px-4 py-2 text-sm rounded-full transition-all ${billingCycle === "monthly" ? "bg-[#03a9f4] text-white shadow" : "text-[#03a9f4]"}`}
+                  key={c}
+                  onClick={() => setBillingCycle(c)}
+                  className={`px-4 py-2 text-sm rounded-full capitalize transition-all ${
+                    billingCycle === c ? "bg-[#019de3] text-white shadow-sm" : "text-gray-600 hover:text-[#019de3]"
+                  }`}
                 >
-                  Monthly
+                  {c}
                 </button>
-
-                {/* Yearly */}
-                <button
-                  type="button"
-                  onClick={() => setBillingCycle("yearly")}
-                  className={`px-4 py-2 text-sm rounded-full transition-all ${billingCycle === "yearly" ? "bg-[#03a9f4] text-white shadow" : "text-[#03a9f4]"}`}
-                >
-                  Yearly
-                </button>
-
-              </div>
+              ))}
             </div>
           </div>
         </header>
 
-        {/* Cards list */}
-        <section>
-          {visiblePlans.map((plan) => (
+        {/* Plan cards */}
+        <section className="flex flex-col gap-4">
+          {PLANS.map((plan) => (
             <PlanCard key={plan.id} plan={plan} billingCycle={billingCycle} />
           ))}
         </section>
 
-
-        {/* Floating chat buttons */}
-        <div className="fixed right-6 bottom-24 flex flex-col gap-4">
-          <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Chat with us now!</button>
-          <button className="bg-[#03a9f4] text-white px-5 py-3 rounded-md shadow-xl">Schedule a call with us!</button>
+        {/* Floating support buttons */}
+        <div className="fixed right-6 bottom-8 flex flex-col gap-3">
+          <button className="bg-[#019de3] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium hover:bg-[#0289c7] transition-colors">
+            💬 Chat with us
+          </button>
+          <button className="bg-white border border-[#019de3] text-[#019de3] px-5 py-3 rounded-xl shadow-lg text-sm font-medium hover:bg-[#f0faff] transition-colors">
+            📞 Schedule a call
+          </button>
         </div>
       </div>
     </div>
