@@ -25,37 +25,47 @@ src/
 ├── layouts/
 │   └── MainLayout.jsx             # Wraps all pages, conditionally renders Header/Footer
 ├── components/
+│   ├── KYCPopup.jsx               # KYC verification popup
+│   ├── OtpPopup.jsx               # 2-step OTP verification modal
 │   ├── common/
 │   │   ├── Header.jsx             # Site-wide navigation bar
 │   │   ├── Footer.jsx             # Site-wide footer
-│   │   └── Container.jsx          # Max-width wrapper for consistent page layout
-│   ├── ui/
-│   │   ├── Button.jsx             # Reusable button
-│   │   ├── EditText.jsx           # Reusable text input
-│   │   └── TextArea.jsx           # Reusable textarea
-│   └── OtpPopup.jsx               # 2-step OTP verification modal
+│   │   ├── Container.jsx          # Max-width wrapper for consistent page layout
+│   │   └── Scrolleffect.jsx       # Scroll effect component
+│   └── ui/
+│       ├── Button.jsx             # Reusable button
+│       ├── EditText.jsx           # Reusable text input
+│       └── TextArea.jsx           # Reusable textarea
 ├── pages/
-│   ├── Home/                      # Landing page (HeroSection, ProductGrid, ProcessSection, etc.)
+│   ├── Home/
+│   │   ├── ContactForm.jsx        # Contact form section
+│   │   ├── HeroSection.jsx        # Hero section
+│   │   ├── index.jsx              # Home page main component
+│   │   ├── PartnersSection.jsx    # Partners section
+│   │   ├── ProcessSection.jsx     # Process section
+│   │   ├── ProductGrid.jsx        # Product grid
+│   │   └── TestimonialSection.jsx # Testimonial section
 │   ├── authentication/
 │   │   ├── Login.jsx
 │   │   └── Signup.jsx
 │   ├── Policy/                    # Insurance purchase flow
-│   │   ├── PolicyDetails.jsx      # User fills personal details + survey
-│   │   ├── Plans.jsx              # Compare available plans
-│   │   ├── Payments.jsx           # Select add-ons, enter details
 │   │   ├── ConfirmationPanel.jsx  # Review before payment
+│   │   ├── KYCPortal.jsx          # KYC portal
+│   │   ├── Paymentcompleted.jsx   # Success screen
 │   │   ├── PaymentPortal.jsx      # Choose payment method
-│   │   └── Paymentcompleted.jsx   # Success screen
+│   │   ├── Payments.jsx           # Select add-ons, enter details
+│   │   ├── Plans.jsx              # Compare available plans
+│   │   └── PolicyDetails.jsx      # User fills personal details + survey
 │   ├── Insurance/
-│   │   ├── RenewPolicy.jsx        # Policy renewal flow
 │   │   ├── Claims.jsx             # File a claim
-│   │   └── ComparePlans.jsx       # Side-by-side plan comparison
+│   │   ├── ComparePlans.jsx       # Side-by-side plan comparison
+│   │   └── RenewPolicy.jsx        # Policy renewal flow
 │   ├── Dashboard/
 │   │   └── index.jsx              # User dashboard — active policies, profile
 │   └── Static/
 │       ├── AboutUs.jsx
-│       ├── TermsAndPrivacy.jsx
-│       └── NotFound.jsx         
+│       ├── NotFound.jsx
+│       └── TermsAndPrivacy.jsx
 └── styles/
     ├── index.css
     └── tailwind.css
