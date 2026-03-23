@@ -31,11 +31,11 @@ export default function ConfirmationPanel() {
 
   const handlePayNow = () => {
     if (!agreed) { alert("Please agree to the terms and conditions."); return; }
-    if (!form.fullName || !form.mobile) { alert("Please fill in name and mobile."); return; }
+    if (!form.fullName || !form.mobile || !form.email) { alert("Please fill in all required fields."); return; }
 
     setSubmitting(true);
     setTimeout(() => {
-      navigate("/payment-portal", {
+      navigate("/kyc", {
         state: { ...state, form, billingCycle, price, plan: incomingPlan, productTitle },
       });
     }, 300);
@@ -135,9 +135,8 @@ export default function ConfirmationPanel() {
               <button
                 onClick={handlePayNow}
                 disabled={!agreed || submitting}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  agreed ? "bg-[#019de3] text-white hover:bg-[#0289c7]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
+                className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${agreed ? "bg-[#019de3] text-white hover:bg-[#0289c7]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}
               >
                 {submitting ? "Opening payment…" : "Pay Now →"}
               </button>
@@ -148,3 +147,4 @@ export default function ConfirmationPanel() {
     </div>
   );
 }
+

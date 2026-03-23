@@ -30,6 +30,7 @@ import ScrollToTop from "./components/common/Scrolleffect";
 
 // Dashboard
 import Dashboard from "./pages/Dashboard";
+import KYCPortal from "./pages/Policy/KYCPortal";
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/plans" element={<Plans />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/confirm" element={<ConfirmationPanel />} />
+          <Route path="/kyc" element={<KYCPortal />} />
           <Route path="/payment-portal" element={<PaymentPortal />} />
           <Route path="/payment-completed" element={<PaymentCompleted />} />
 

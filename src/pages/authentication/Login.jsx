@@ -2,14 +2,27 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle, FaFacebook, FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "../../components/ui/Button";
+import KYCPopup from "../../components/KYCPopup";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showKycPopup, setShowKycPopup] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
+    // Simulate login success
+    setShowKycPopup(true);
+  };
+
+  const handleSkipKYC = () => {
+    setShowKycPopup(false);
     navigate("/");
+  };
+
+  const handleCompleteKYC = () => {
+    setShowKycPopup(false);
+    navigate("/kyc", { state: { fromLogin: true } });
   };
 
   const inputClass =
@@ -95,6 +108,11 @@ const Login = () => {
           </p>
         </div>
       </div>
+      <KYCPopup
+        isOpen={showKycPopup}
+        onClose={handleSkipKYC}
+        onCompleteKYC={handleCompleteKYC}
+      />
     </div>
   );
 };
