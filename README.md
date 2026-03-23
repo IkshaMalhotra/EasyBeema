@@ -99,7 +99,7 @@ npm run build
 
 ---
 
-## Frontend Only - No Backend 
+## Frontend Only - No Backend (Yet)
  
 This is intentionally a frontend-only project. All data (insurance plans, user profiles, payment details) is currently hardcoded as demo data directly in the components.
  
