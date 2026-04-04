@@ -1,6 +1,6 @@
 # EasyBeema - Digital Insurance Marketplace
 
-EasyBeema is a frontend web application built with React.js. It is a trusted digital insurance marketplace that makes it simple for users to compare, choose, and buy the right insurance coverage anytime, anywhere.
+EasyBeema is a frontend web application built with React.js and Tailwind CSS. It is a trusted digital insurance marketplace that makes it simple for users to compare, choose, and buy the right insurance coverage anytime, anywhere.
 
 ---
 
