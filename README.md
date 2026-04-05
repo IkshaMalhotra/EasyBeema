@@ -107,4 +107,4 @@ This is intentionally a frontend-only project. All data (insurance plans, user p
 
 ## Author
 
-**[Iksha Malhotra](https://github.com/IkshaMalhotra)** - Frontend Development
+**[Iksha Malhotra](https://github.com/IkshaMalhotra)**
